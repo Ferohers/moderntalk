@@ -1,0 +1,25 @@
+services:
+  modernuo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: modernuo_server
+    restart: unless-stopped
+    ports:
+      - "2593:2593"    # Game server
+      - "8080:8080"    # Web portal
+    volumes:
+      - ./gamefiles:/gamefiles
+      # We map the Configuration folder directly now that it generated
+      - ./configuration:/app/Configuration
+      - ./shard:/app/Saves
+    environment:
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+    cap_add:
+      - SYS_NICE
+      - IPC_LOCK
+    # Tell Docker to allow io_uring system calls
+    security_opt:
+      - seccomp:unconfined
+    stdin_open: true
+    tty: true

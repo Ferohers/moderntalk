@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModernUO - Account Dashboard</title>
+    <link rel="stylesheet" href="/css/uo-theme.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <a href="/" class="site-title">⚔ ModernUO</a>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">Home</a>
+                <span class="nav-link" style="color: var(--gold-primary);" id="nav-username">Account</span>
+                <button class="uo-btn uo-btn-sm uo-btn-danger" onclick="handleLogout()">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1 class="auth-title">Account Dashboard</h1>
+
+        <div id="alert" class="uo-alert hidden"></div>
+
+        <!-- Account Info -->
+        <div class="uo-frame" style="margin-bottom: 1.5rem;">
+            <div class="uo-frame-inner">
+                <h2 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                    Account Information
+                </h2>
+                <div class="dashboard-grid" id="account-info">
+                    <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
+                        <div class="info-label">Status</div>
+                        <div class="info-value" id="account-status">
+                            <span class="spinner"></span> Loading...
+                        </div>
+                    </div>
+                    <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
+                        <div class="info-label">Username</div>
+                        <div class="info-value" id="account-username">—</div>
+                    </div>
+                    <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
+                        <div class="info-label">Created</div>
+                        <div class="info-value" id="account-created">—</div>
+                    </div>
+                    <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value" id="account-lastlogin">—</div>
+                    </div>
+                    <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
+                        <div class="info-label">Characters</div>
+                        <div class="info-value" id="account-chars">—</div>
+                    </div>
+                    <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
+                        <div class="info-label">Access Level</div>
+                        <div class="info-value" id="account-access">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="uo-frame">
+            <div class="uo-frame-inner">
+                <h2 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                    Change Password
+                </h2>
+                <form id="change-password-form" onsubmit="return handleChangePassword(event)">
+                    <div class="uo-input-group">
+                        <label class="uo-label" for="current-password">Current Password</label>
+                        <input type="password" id="current-password" class="uo-input" 
+                               placeholder="Enter current password" 
+                               autocomplete="current-password" 
+                               required>
+                    </div>
+
+                    <div class="uo-input-group">
+                        <label class="uo-label" for="new-password">New Password</label>
+                        <input type="password" id="new-password" class="uo-input" 
+                               placeholder="Enter new password" 
+                               autocomplete="new-password" 
+                               required minlength="8" maxlength="128"
+                               oninput="checkPasswordStrength(this.value)">
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strength-bar"></div>
+                        </div>
+                        <div class="uo-input-hint" id="strength-text">Minimum 8 characters</div>
+                    </div>
+
+                    <div class="uo-input-group">
+                        <label class="uo-label" for="confirm-new-password">Confirm New Password</label>
+                        <input type="password" id="confirm-new-password" class="uo-input" 
+                               placeholder="Re-enter new password" 
+                               autocomplete="new-password" 
+                               required minlength="8" maxlength="128">
+                    </div>
+
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button type="submit" class="uo-btn" id="change-pw-btn">
+                            Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>Powered by <a href="https://modernuo.com" target="_blank" rel="noopener">ModernUO</a></p>
+    </footer>
+
+    <script src="/js/app.js"></script>
+    <script>
+        let currentUsername = null;
+
+        // Check authentication and load account info
+        (async () => {
+            if (!(await Api.isAuthenticated())) {
+                window.location.href = '/login.html';
+                return;
+            }
+            await loadAccountInfo();
+        })();
+
+        async function loadAccountInfo() {
+            try {
+                const info = await Api.getAccountInfo();
+                if (info.error) {
+                    showAlert(info.error, 'error');
+                    return;
+                }
+
+                currentUsername = info.username;
+                document.getElementById('nav-username').textContent = info.username;
+                document.getElementById('account-username').textContent = info.username;
+                document.getElementById('account-created').textContent = formatDate(info.created);
+                document.getElementById('account-lastlogin').textContent = formatDate(info.lastLogin);
+                document.getElementById('account-chars').textContent = `${info.characterCount} / ${info.maxCharacters}`;
+                document.getElementById('account-access').textContent = info.accessLevel;
+
+                const statusEl = document.getElementById('account-status');
+                if (info.banned) {
+                    statusEl.textContent = 'Banned';
+                    statusEl.className = 'info-value banned';
+                } else {
+                    statusEl.textContent = 'Active';
+                    statusEl.className = 'info-value active';
+                }
+            } catch (err) {
+                showAlert('Failed to load account information', 'error');
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('strength-bar');
+            const text = document.getElementById('strength-text');
+
+            bar.className = 'password-strength-bar';
+
+            if (password.length === 0) {
+                text.textContent = 'Minimum 8 characters';
+                return;
+            }
+
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (password.length >= 12) score++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+            if (/\d/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+
+            if (score <= 2) {
+                bar.classList.add('strength-weak');
+                text.textContent = 'Weak — try adding numbers and symbols';
+            } else if (score <= 3) {
+                bar.classList.add('strength-medium');
+                text.textContent = 'Medium — consider adding more variety';
+            } else {
+                bar.classList.add('strength-strong');
+                text.textContent = 'Strong password';
+            }
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const alertEl = document.getElementById('alert');
+            const btn = document.getElementById('change-pw-btn');
+
+            alertEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = 'Changing password...';
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+            if (newPassword !== confirmNewPassword) {
+                showAlert('New passwords do not match', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Change Password';
+                return false;
+            }
+
+            try {
+                const result = await Api.changePassword(currentPassword, newPassword, confirmNewPassword);
+                if (result.error) {
+                    showAlert(result.error, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Change Password';
+                } else {
+                    showAlert('Password changed successfully!', 'success');
+                    document.getElementById('change-password-form').reset();
+                    document.getElementById('strength-bar').className = 'password-strength-bar';
+                    document.getElementById('strength-text').textContent = 'Minimum 8 characters';
+                    btn.disabled = false;
+                    btn.textContent = 'Change Password';
+                }
+            } catch (err) {
+                showAlert('An error occurred. Please try again.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Change Password';
+            }
+
+            return false;
+        }
+
+        async function handleLogout() {
+            await Api.logout();
+            window.location.href = '/';
+        }
+
+        function formatDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertEl = document.getElementById('alert');
+            alertEl.textContent = message;
+            alertEl.className = `uo-alert uo-alert-${type === 'error' ? 'error' : 'success'}`;
+            alertEl.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

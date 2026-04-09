@@ -15,6 +15,7 @@
   <Project Path="Projects/Server/Server.csproj" />
   <Project Path="Projects/UOContent.Tests/UOContent.Tests.csproj" />
   <Project Path="Projects/UOContent/UOContent.csproj" />
+  <Project Path="Projects/WebPortal/WebPortal.csproj" />
   <Properties Name="Visual Studio">
     <Property Name="MinimumVersion" Value="18.0.11222.15" />
   </Properties>

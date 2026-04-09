@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModernUO - Create Account</title>
+    <link rel="stylesheet" href="/css/uo-theme.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <a href="/" class="site-title">⚔ ModernUO</a>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/login.html" class="nav-link">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="auth-container">
+            <h1 class="auth-title">Create Account</h1>
+
+            <div id="alert" class="uo-alert uo-alert-error hidden"></div>
+
+            <div class="uo-frame">
+                <div class="uo-frame-inner">
+                    <form id="register-form" onsubmit="return handleRegister(event)">
+                        <div class="uo-input-group">
+                            <label class="uo-label" for="username">Username</label>
+                            <input type="text" id="username" class="uo-input" 
+                                   placeholder="Choose a username" 
+                                   autocomplete="username" 
+                                   required minlength="3" maxlength="30"
+                                   pattern="[^\s<>:\"/\\|?*]+">
+                            <div class="uo-input-hint">3-30 characters. No spaces at start/end, no trailing period. Cannot contain: < > : " / \ | ? *</div>
+                        </div>
+
+                        <div class="uo-input-group">
+                            <label class="uo-label" for="password">Password</label>
+                            <input type="password" id="password" class="uo-input" 
+                                   placeholder="Choose a password" 
+                                   autocomplete="new-password" 
+                                   required minlength="8" maxlength="128"
+                                   oninput="checkPasswordStrength(this.value)">
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="strength-bar"></div>
+                            </div>
+                            <div class="uo-input-hint" id="strength-text">Minimum 8 characters</div>
+                        </div>
+
+                        <div class="uo-input-group">
+                            <label class="uo-label" for="confirm-password">Confirm Password</label>
+                            <input type="password" id="confirm-password" class="uo-input" 
+                                   placeholder="Re-enter your password" 
+                                   autocomplete="new-password" 
+                                   required minlength="8" maxlength="128">
+                        </div>
+
+                        <div class="uo-input-group">
+                            <label class="uo-label" for="email">Email <span style="color: var(--text-dim); text-transform: none; font-family: var(--font-body);">(optional)</span></label>
+                            <input type="email" id="email" class="uo-input" 
+                                   placeholder="your@email.com" 
+                                   autocomplete="email" 
+                                   maxlength="256">
+                        </div>
+
+                        <div style="text-align: center; margin-top: 1.5rem;">
+                            <button type="submit" class="uo-btn uo-btn-primary" id="submit-btn" style="width: 100%;">
+                                Create Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login.html">Sign in</a></p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>Powered by <a href="https://modernuo.com" target="_blank" rel="noopener">ModernUO</a></p>
+    </footer>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // If already logged in, redirect to dashboard
+        (async () => {
+            if (await Api.isAuthenticated()) {
+                window.location.href = '/dashboard.html';
+            }
+        })();
+
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('strength-bar');
+            const text = document.getElementById('strength-text');
+
+            bar.className = 'password-strength-bar';
+
+            if (password.length === 0) {
+                text.textContent = 'Minimum 8 characters';
+                return;
+            }
+
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (password.length >= 12) score++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+            if (/\d/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+
+            if (score <= 2) {
+                bar.classList.add('strength-weak');
+                text.textContent = 'Weak — try adding numbers and symbols';
+            } else if (score <= 3) {
+                bar.classList.add('strength-medium');
+                text.textContent = 'Medium — consider adding more variety';
+            } else {
+                bar.classList.add('strength-strong');
+                text.textContent = 'Strong password';
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const alertEl = document.getElementById('alert');
+            const btn = document.getElementById('submit-btn');
+            
+            alertEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = 'Creating account...';
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const email = document.getElementById('email').value.trim();
+
+            // Client-side validation
+            if (password !== confirmPassword) {
+                alertEl.textContent = 'Passwords do not match';
+                alertEl.classList.remove('hidden');
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+                return false;
+            }
+
+            try {
+                const result = await Api.register(username, password, confirmPassword, email || undefined);
+                if (result.error) {
+                    alertEl.textContent = result.error;
+                    alertEl.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.textContent = 'Create Account';
+                } else {
+                    window.location.href = '/dashboard.html';
+                }
+            } catch (err) {
+                alertEl.textContent = 'An error occurred. Please try again.';
+                alertEl.classList.remove('hidden');
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>

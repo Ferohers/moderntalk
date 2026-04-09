@@ -11,6 +11,9 @@
         <Configurations>Debug;Release;Analyze</Configurations>
         <RootNamespace>Server</RootNamespace>
     </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
     <Target Name="CleanPub" AfterTargets="Clean">
         <Message Text="Application: Removing distribution files..." />
         <Delete Files="..\..\Distribution\$(AssemblyName)" ContinueOnError="true" />
@@ -25,6 +28,9 @@
     <ItemGroup>
         <ProjectReference Include="..\Server\Server.csproj" />
         <ProjectReference Include="..\UOContent\UOContent.csproj" Private="false" PrivateAssets="All" IncludeAssets="None">
+            <IncludeInPackage>false</IncludeInPackage>
+        </ProjectReference>
+        <ProjectReference Include="..\WebPortal\WebPortal.csproj" Private="false" PrivateAssets="All" IncludeAssets="None">
             <IncludeInPackage>false</IncludeInPackage>
         </ProjectReference>
     </ItemGroup>
