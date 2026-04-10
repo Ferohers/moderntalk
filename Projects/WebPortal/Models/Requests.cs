@@ -47,3 +47,26 @@ public class RefreshRequest
     [Required(ErrorMessage = "Refresh token is required")]
     public string RefreshToken { get; set; } = "";
 }
+
+public class ForgotPasswordRequest
+{
+    [Required(ErrorMessage = "Username is required")]
+    public string Username { get; set; } = "";
+
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid email address")]
+    public string Email { get; set; } = "";
+}
+
+public class ResetPasswordRequest
+{
+    [Required(ErrorMessage = "Reset token is required")]
+    public string ResetToken { get; set; } = "";
+
+    [Required(ErrorMessage = "New password is required")]
+    [StringLength(128, MinimumLength = 8, ErrorMessage = "New password must be between 8 and 128 characters")]
+    public string NewPassword { get; set; } = "";
+
+    [Compare("NewPassword", ErrorMessage = "Passwords do not match")]
+    public string ConfirmNewPassword { get; set; } = "";
+}

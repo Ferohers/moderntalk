@@ -63,6 +63,7 @@ public static class WebPortalHost
             builder.Services.AddSingleton<AccountLockoutService>();
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<AccountService>();
+            builder.Services.AddSingleton<EmailService>();
 
             // Configure JWT authentication
             var key = Encoding.UTF8.GetBytes(WebPortalConfiguration.JwtSecret);

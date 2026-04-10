@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Server.WebPortal.Models;
 using Server.WebPortal.Services;
+using Server.Accounting;
+using Server.Misc;
 using System.Threading.Tasks;
 
 namespace Server.WebPortal.Endpoints;
@@ -50,7 +52,9 @@ public static class AuthEndpoints
 
             if (error != null)
             {
-                return Results.Unauthorized();
+                // Return 400 (not 401) so the frontend shows the actual error message
+                // instead of triggering a token refresh flow
+                return Results.BadRequest(new ErrorResponse { Error = error });
             }
 
             // Set tokens as HttpOnly cookies
@@ -89,6 +93,111 @@ public static class AuthEndpoints
             SetAuthCookies(response, authResponse);
 
             return Results.Ok(new { username, expiresIn });
+        });
+
+        group.MapPost("/forgot-password", async (ForgotPasswordRequest request, TokenService tokenService, EmailService emailService) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Email))
+            {
+                return Results.BadRequest(new ErrorResponse { Error = "Username and email are required" });
+            }
+
+            // Look up the account and verify email matches
+            var account = await GameThreadDispatcher.Enqueue(() =>
+            {
+                var acct = Accounts.GetAccount(request.Username) as Account;
+                if (acct == null || acct.Banned)
+                {
+                    return (Account?)null;
+                }
+
+                // Verify email matches (case-insensitive)
+                if (string.IsNullOrWhiteSpace(acct.Email) ||
+                    !acct.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (Account?)null;
+                }
+
+                return acct;
+            });
+
+            if (account == null)
+            {
+                // Anti-enumeration: always return success even if account not found
+                return Results.Ok(new { message = "If an account with that username and email exists, a reset link has been sent." });
+            }
+
+            // Generate reset token
+            var resetToken = tokenService.GeneratePasswordResetToken(request.Username);
+            if (resetToken == null)
+            {
+                return Results.Ok(new { message = "If an account with that username and email exists, a reset link has been sent." });
+            }
+
+            // Send email
+            var emailSent = await emailService.SendPasswordResetEmail(request.Email, request.Username, resetToken);
+
+            if (!emailSent)
+            {
+                // SMTP not configured — return the token directly for testing
+                // In production with SMTP configured, this branch should not be hit
+                return Results.Ok(new
+                {
+                    message = "Password reset requested. SMTP is not configured, so the reset token is returned directly.",
+                    resetToken = resetToken
+                });
+            }
+
+            return Results.Ok(new { message = "If an account with that username and email exists, a reset link has been sent." });
+        });
+
+        group.MapPost("/reset-password", async (ResetPasswordRequest request, TokenService tokenService) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.ResetToken) || string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return Results.BadRequest(new ErrorResponse { Error = "Reset token and new password are required" });
+            }
+
+            if (request.NewPassword != request.ConfirmNewPassword)
+            {
+                return Results.BadRequest(new ErrorResponse { Error = "Passwords do not match" });
+            }
+
+            // Validate the reset token
+            var username = tokenService.ValidatePasswordResetToken(request.ResetToken);
+            if (username == null)
+            {
+                return Results.BadRequest(new ErrorResponse { Error = "Invalid or expired reset token" });
+            }
+
+            // Validate new password format
+            if (!AccountHandler.IsValidPassword(request.NewPassword))
+            {
+                return Results.BadRequest(new ErrorResponse { Error = "Invalid new password format" });
+            }
+
+            // Reset the password on the game thread
+            var result = await GameThreadDispatcher.Enqueue(() =>
+            {
+                var acct = Accounts.GetAccount(username) as Account;
+                if (acct == null)
+                {
+                    return (false, "Account not found");
+                }
+
+                acct.SetPassword(request.NewPassword);
+                return (true, (string?)null);
+            });
+
+            if (!result.Item1)
+            {
+                return Results.BadRequest(new ErrorResponse { Error = result.Item2 });
+            }
+
+            // Invalidate all refresh tokens for this user (force re-login)
+            tokenService.InvalidateAllRefreshTokens(username);
+
+            return Results.Ok(new SuccessResponse { Message = "Password has been reset successfully. Please log in with your new password." });
         });
 
         group.MapPost("/logout", (HttpContext context, AuthService authService, TokenService tokenService) =>

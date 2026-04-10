@@ -9,8 +9,8 @@
 <body>
     <header class="site-header">
         <div class="header-content">
-            <a href="/" class="site-title">⚔ ModernUO</a>
-            <nav class="header-nav">
+            <a href="/" class="site-title">ModernUO</a>
+            <nav class="header-nav" id="main-nav">
                 <a href="/login.html" class="nav-link">Login</a>
                 <a href="/register.html" class="nav-link uo-btn uo-btn-sm uo-btn-primary">Sign Up</a>
             </nav>
@@ -96,13 +96,13 @@
         <hr class="uo-divider">
 
         <!-- Call to Action -->
-        <section style="text-align: center; padding: 1rem 0;">
+        <section style="text-align: center; padding: 1rem 0;" id="cta-section">
             <p style="color: var(--text-dim); margin-bottom: 1rem; font-size: 1.1rem;">
                 Ready to begin your journey?
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="/register.html" class="uo-btn uo-btn-primary">Create Account</a>
-                <a href="/login.html" class="uo-btn">Sign In</a>
+                <a href="/register.html" class="uo-btn uo-btn-primary" id="cta-register">Create Account</a>
+                <a href="/login.html" class="uo-btn" id="cta-login">Sign In</a>
             </div>
         </section>
 
@@ -134,9 +134,36 @@
     <script src="/js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            // Check if user is logged in and update nav
+            try {
+                const accountInfo = await Api.getAccountInfo();
+                if (accountInfo && !accountInfo.error) {
+                    // User is logged in — show username + dashboard + logout
+                    const nav = document.getElementById('main-nav');
+                    nav.innerHTML = `
+                        <span class="nav-link" style="color: var(--gold-primary);">⚔ ${accountInfo.username}</span>
+                        <a href="/dashboard.html" class="nav-link">Dashboard</a>
+                        <button class="uo-btn uo-btn-sm uo-btn-danger" onclick="Api.logout().then(() => window.location.reload())">Logout</button>
+                    `;
+                    // Update CTA section
+                    const ctaSection = document.getElementById('cta-section');
+                    ctaSection.innerHTML = `
+                        <p style="color: var(--text-dim); margin-bottom: 1rem; font-size: 1.1rem;">
+                            Welcome back, ${accountInfo.username}!
+                        </p>
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="/dashboard.html" class="uo-btn uo-btn-primary">Go to Dashboard</a>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                // Not logged in — keep default nav (Login / Sign Up)
+            }
+
+            // Load server info
             try {
                 const info = await Api.getServerInfo();
-                if (info) {
+                if (info && !info.error) {
                     document.getElementById('connection-address').textContent = info.connectionHost;
                     document.getElementById('connection-port').textContent = info.connectionPort;
                     document.getElementById('player-count').textContent = info.playerCount;

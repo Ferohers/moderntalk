@@ -12,6 +12,7 @@ namespace Server.WebPortal.Services;
 public class TokenService
 {
     private static readonly ConcurrentDictionary<string, RefreshTokenEntry> _refreshTokens = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, PasswordResetEntry> _passwordResetTokens = new(StringComparer.OrdinalIgnoreCase);
     private readonly SigningCredentials _signingCredentials;
 
     public TokenService()
@@ -119,6 +120,35 @@ public class TokenService
         }
     }
 
+    public string? GeneratePasswordResetToken(string username)
+    {
+        var token = GenerateSecureToken();
+        _passwordResetTokens[token] = new PasswordResetEntry
+        {
+            Username = username,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(15)
+        };
+        return token;
+    }
+
+    public string? ValidatePasswordResetToken(string token)
+    {
+        if (!_passwordResetTokens.TryGetValue(token, out var entry))
+        {
+            return null;
+        }
+
+        if (entry.ExpiresAt < DateTime.UtcNow)
+        {
+            _passwordResetTokens.TryRemove(token, out _);
+            return null;
+        }
+
+        // Token is valid — remove it (one-time use)
+        _passwordResetTokens.TryRemove(token, out _);
+        return entry.Username;
+    }
+
     private static string GenerateRefreshToken()
     {
         var bytes = new byte[32];
@@ -126,7 +156,20 @@ public class TokenService
         return Convert.ToBase64String(bytes);
     }
 
+    private static string GenerateSecureToken()
+    {
+        var bytes = new byte[48];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes);
+    }
+
     private class RefreshTokenEntry
+    {
+        public string Username { get; set; } = "";
+        public DateTime ExpiresAt { get; set; }
+    }
+
+    private class PasswordResetEntry
     {
         public string Username { get; set; } = "";
         public DateTime ExpiresAt { get; set; }

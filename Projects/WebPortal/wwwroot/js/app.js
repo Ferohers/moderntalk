@@ -139,6 +139,33 @@ const Api = {
     },
 
     /**
+     * Request a password reset email
+     */
+    async forgotPassword(username, email) {
+        return this.request('/api/auth/forgot-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                username: username,
+                email: email
+            })
+        });
+    },
+
+    /**
+     * Reset password using a reset token
+     */
+    async resetPassword(resetToken, newPassword, confirmNewPassword) {
+        return this.request('/api/auth/reset-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                resetToken: resetToken,
+                newPassword: newPassword,
+                confirmNewPassword: confirmNewPassword
+            })
+        });
+    },
+
+    /**
      * Check if the user is currently authenticated
      * Makes a lightweight request to the account info endpoint
      */
