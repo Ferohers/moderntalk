@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Server.WebPortal.Models;
 using Server.WebPortal.Services;
-using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 
 namespace Server.WebPortal.Endpoints;
@@ -60,9 +59,16 @@ public static class AuthEndpoints
             return Results.Ok(new { authResponse!.Username, authResponse.ExpiresIn });
         });
 
-        group.MapPost("/refresh", async (RefreshRequest request, AuthService authService, TokenService tokenService, HttpResponse response) =>
+        group.MapPost("/refresh", async (HttpContext context, AuthService authService, TokenService tokenService, HttpResponse response) =>
         {
-            var (username, error) = authService.RefreshToken(request.RefreshToken);
+            // Read refresh token from HttpOnly cookie (not request body)
+            var refreshToken = context.Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Results.Unauthorized();
+            }
+
+            var (username, error) = authService.RefreshToken(refreshToken);
 
             if (error != null)
             {
@@ -88,16 +94,16 @@ public static class AuthEndpoints
         group.MapPost("/logout", (HttpContext context, AuthService authService, TokenService tokenService) =>
         {
             var refreshToken = context.Request.Cookies["refresh_token"];
-            var username = context.User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            var username = context.User.Identity?.Name;
 
             if (refreshToken != null)
             {
                 authService.Logout(refreshToken, username);
             }
 
-            // Clear cookies
-            context.Response.Cookies.Delete("access_token");
-            context.Response.Cookies.Delete("refresh_token");
+            // Clear cookies - must match the paths used when setting them
+            context.Response.Cookies.Delete("access_token", new CookieOptions { Path = "/api/" });
+            context.Response.Cookies.Delete("refresh_token", new CookieOptions { Path = "/api/auth/" });
 
             return Results.Ok(new SuccessResponse { Message = "Logged out successfully" });
         }).RequireAuthorization();
@@ -109,23 +115,23 @@ public static class AuthEndpoints
         // If you add a reverse proxy with HTTPS later, set this to true
         const bool secure = false;
 
-        // Access token - shorter expiry
+        // Access token - shorter expiry, scoped to /api/ path only
         response.Cookies.Append("access_token", authResponse.AccessToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = secure,
             SameSite = SameSiteMode.Lax,
-            Path = "/",
+            Path = "/api/",
             MaxAge = TimeSpan.FromSeconds(authResponse.ExpiresIn)
         });
 
-        // Refresh token - longer expiry
+        // Refresh token - longer expiry, scoped to /api/auth/ (used by refresh and logout)
         response.Cookies.Append("refresh_token", authResponse.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = secure,
             SameSite = SameSiteMode.Lax,
-            Path = "/",
+            Path = "/api/auth/",
             MaxAge = TimeSpan.FromDays(7)
         });
     }

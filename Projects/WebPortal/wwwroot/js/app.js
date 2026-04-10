@@ -95,11 +95,10 @@ const Api = {
      */
     async refreshToken() {
         try {
+            // Refresh token is sent automatically via HttpOnly cookie
             const response = await fetch('/api/auth/refresh', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'same-origin',
-                body: JSON.stringify({ refreshToken: '' }) // Cookie-based
+                credentials: 'same-origin'
             });
 
             return response.ok;

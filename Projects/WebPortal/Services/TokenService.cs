@@ -32,17 +32,19 @@ public class TokenService
             new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(claims),
-            Expires = expiresAt,
-            SigningCredentials = _signingCredentials,
-            Issuer = "ModernUO",
-            Audience = "ModernUO-WebPortal"
-        };
-
+        // Use JwtSecurityToken constructor directly to ensure exp is set correctly.
+        // SecurityTokenDescriptor + CreateToken() has a known issue in System.IdentityModel.Tokens.Jwt v8+
+        // where the Expires property may not be written to the JWT payload (exp = iat).
         var handler = new JwtSecurityTokenHandler();
-        var accessToken = handler.WriteToken(handler.CreateToken(tokenDescriptor));
+        var token = new JwtSecurityToken(
+            issuer: "ModernUO",
+            audience: "ModernUO-WebPortal",
+            claims: claims,
+            notBefore: now,
+            expires: expiresAt,
+            signingCredentials: _signingCredentials
+        );
+        var accessToken = handler.WriteToken(token);
 
         var refreshToken = GenerateRefreshToken();
         var refreshTokenExpiry = now.AddDays(WebPortalConfiguration.RefreshTokenExpiryDays);

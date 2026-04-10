@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using Server;
 using Server.WebPortal.Configuration;
 using Server.WebPortal.Endpoints;
@@ -71,21 +71,29 @@ public static class WebPortalHost
                 {
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                     {
-                        ValidateIssuerSigningKey = false,
+                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = false,
+                        ValidateIssuer = true,
                         ValidIssuer = "ModernUO",
-                        ValidateAudience = false,
+                        ValidateAudience = true,
                         ValidAudience = "ModernUO-WebPortal",
-                        ValidateLifetime = false,
+                        ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromMinutes(1),
-                        RequireSignedTokens = false
+                        RequireSignedTokens = true,
+                        NameClaimType = JwtRegisteredClaimNames.Sub
                     };
+
+                    // Disable inbound claim mapping so "sub" stays as "sub" instead of being
+                    // mapped to the long URI ClaimTypes.NameIdentifier. This ensures
+                    // context.User.Identity.Name returns the username via NameClaimType above.
+                    options.TokenHandlers.Clear();
+                    options.TokenHandlers.Add(new JwtSecurityTokenHandler { MapInboundClaims = false });
 
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
+                            // Read token from HttpOnly cookie first, fall back to Authorization header
                             var token = context.Request.Cookies["access_token"];
                             if (string.IsNullOrEmpty(token))
                             {
@@ -96,32 +104,11 @@ public static class WebPortalHost
                                 }
                             }
 
-                            Console.WriteLine($"[JWT OnMessageReceived] Cookie: {context.Request.Cookies["access_token"]?.Substring(0, Math.Min(30, context.Request.Cookies["access_token"]?.Length ?? 0))}...");
-                            Console.WriteLine($"[JWT OnMessageReceived] Header: {context.Request.Headers["Authorization"]}");
-                            Console.WriteLine($"[JWT OnMessageReceived] Token set: {!string.IsNullOrEmpty(token)}");
-
                             if (!string.IsNullOrEmpty(token))
                             {
                                 context.Token = token;
                             }
 
-                            return Task.CompletedTask;
-                        },
-                        OnAuthenticationFailed = context =>
-                        {
-                            Console.WriteLine($"[JWT FAILED] {context.Exception.GetType().Name}: {context.Exception.Message}");
-                            if (context.Exception.InnerException != null)
-                            {
-                                Console.WriteLine($"[JWT FAILED] Inner: {context.Exception.InnerException.Message}");
-                            }
-                            return Task.CompletedTask;
-                        },
-                        OnChallenge = context =>
-                        {
-                            Console.WriteLine($"[JWT CHALLENGE] AuthFailure: {context.AuthenticateFailure?.Message}");
-                            Console.WriteLine($"[JWT CHALLENGE] Error: {context.Error}");
-                            Console.WriteLine($"[JWT CHALLENGE] ErrorDescription: {context.ErrorDescription}");
-                            Console.WriteLine($"[JWT CHALLENGE] Stack: {context.AuthenticateFailure?.StackTrace?.Substring(0, Math.Min(500, context.AuthenticateFailure?.StackTrace?.Length ?? 0))}");
                             return Task.CompletedTask;
                         }
                     };
@@ -147,25 +134,6 @@ public static class WebPortalHost
             app.MapAuthEndpoints();
             app.MapAccountEndpoints();
             app.MapServerEndpoints();
-
-            // Debug endpoint to inspect JWT config - requires auth
-            app.MapGet("/debug/jwt", async (HttpContext ctx) =>
-            {
-                var cookie = ctx.Request.Cookies["access_token"];
-                var authHeader = ctx.Request.Headers["Authorization"].ToString();
-                var user = ctx.User?.Identity;
-                var identity = ctx.User?.Identity as System.Security.Claims.ClaimsIdentity;
-                var claims = identity?.Claims.Select(c => $"{c.Type}={c.Value}").ToArray();
-                return Results.Ok(new
-                {
-                    CookieLength = cookie?.Length ?? 0,
-                    HasAuthHeader = !string.IsNullOrEmpty(authHeader),
-                    AuthHeader = authHeader,
-                    UserIdentity = user?.Name,
-                    IsAuthenticated = user?.IsAuthenticated,
-                    Claims = claims
-                });
-            }).RequireAuthorization();
 
             _app = app;
 
