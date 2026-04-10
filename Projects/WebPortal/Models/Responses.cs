@@ -1,3 +1,5 @@
+using System;
+
 namespace Server.WebPortal.Models;
 
 public class AuthResponse
