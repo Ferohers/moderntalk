@@ -80,12 +80,22 @@ public static class WebPortalHost
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };
 
-                    // Read token from cookie instead of Authorization header
+                    // Read token from cookie or Authorization header
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
                             var token = context.Request.Cookies["access_token"];
+                            if (string.IsNullOrEmpty(token))
+                            {
+                                // Fall back to Authorization header
+                                var authHeader = context.Request.Headers["Authorization"].ToString();
+                                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    token = authHeader.Substring("Bearer ".Length).Trim();
+                                }
+                            }
+
                             if (!string.IsNullOrEmpty(token))
                             {
                                 context.Token = token;
