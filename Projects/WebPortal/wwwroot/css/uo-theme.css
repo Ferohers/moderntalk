@@ -283,7 +283,7 @@ body {
 /* === Hero Section === */
 .hero {
     text-align: center;
-    padding: 3rem 2rem;
+#    padding: 3rem 2rem;
     margin-bottom: 2rem;
 }
 
