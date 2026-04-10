@@ -19,15 +19,6 @@ public class AccountService
                 return null;
             }
 
-            int charCount = 0;
-            for (var i = 0; i < acct.Length; i++)
-            {
-                if (acct[i] != null)
-                {
-                    charCount++;
-                }
-            }
-
             return new AccountInfoResponse
             {
                 Username = acct.Username,
@@ -36,7 +27,7 @@ public class AccountService
                 Banned = acct.Banned,
                 Created = acct.Created,
                 LastLogin = acct.LastLogin,
-                CharacterCount = charCount,
+                CharacterCount = acct.Count,
                 MaxCharacters = acct.Limit
             };
         });

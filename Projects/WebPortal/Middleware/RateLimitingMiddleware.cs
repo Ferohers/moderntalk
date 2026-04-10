@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Http;
 
 namespace Server.WebPortal.Middleware;
 

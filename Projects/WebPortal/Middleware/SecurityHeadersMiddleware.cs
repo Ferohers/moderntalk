@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace Server.WebPortal.Middleware;
 
 public class SecurityHeadersMiddleware

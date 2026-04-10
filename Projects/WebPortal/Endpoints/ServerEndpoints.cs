@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Server;
 using Server.Accounting;
 using Server.WebPortal.Configuration;
 using Server.WebPortal.Models;
@@ -34,7 +37,7 @@ public static class ServerEndpoints
                 ServerName = WebPortalConfiguration.ServerName,
                 Online = true,
                 PlayerCount = playerCount,
-                ClientVersion = ServerConfiguration.GetSetting("server.clientVersion", "7.0.96.0"),
+                ClientVersion = ServerConfiguration.GetOrUpdateSetting("server.clientVersion", "7.0.96.0"),
                 Expansion = Core.Expansion.ToString(),
                 ConnectionHost = WebPortalConfiguration.ConnectionHost,
                 ConnectionPort = WebPortalConfiguration.ConnectionPort

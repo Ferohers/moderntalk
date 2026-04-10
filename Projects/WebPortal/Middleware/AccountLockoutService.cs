@@ -1,10 +1,11 @@
+using System.Collections.Concurrent;
 using Server.WebPortal.Configuration;
 
 namespace Server.WebPortal.Middleware;
 
 public class AccountLockoutService
 {
-    private readonly Dictionary<string, LockoutEntry> _lockoutEntries = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, LockoutEntry> _lockoutEntries = new(StringComparer.OrdinalIgnoreCase);
 
     public LockoutResult CheckLockout(string username)
     {
@@ -13,56 +14,59 @@ public class AccountLockoutService
             return LockoutResult.Allowed;
         }
 
-        if (entry.LockedUntil.HasValue && entry.LockedUntil.Value > DateTime.UtcNow)
+        lock (entry)
         {
-            return new LockoutResult
+            if (entry.LockedUntil.HasValue && entry.LockedUntil.Value > DateTime.UtcNow)
             {
-                IsLocked = true,
-                LockedUntil = entry.LockedUntil.Value,
-                FailedAttempts = entry.FailedAttempts
-            };
-        }
+                return new LockoutResult
+                {
+                    IsLocked = true,
+                    LockedUntil = entry.LockedUntil.Value,
+                    FailedAttempts = entry.FailedAttempts
+                };
+            }
 
-        // Lockout expired, reset
-        if (entry.LockedUntil.HasValue && entry.LockedUntil.Value <= DateTime.UtcNow)
-        {
-            entry.FailedAttempts = 0;
-            entry.LockedUntil = null;
+            // Lockout expired, reset
+            if (entry.LockedUntil.HasValue)
+            {
+                entry.FailedAttempts = 0;
+                entry.LockedUntil = null;
+            }
+
             return LockoutResult.Allowed;
         }
-
-        return LockoutResult.Allowed;
     }
 
     public void RecordFailedAttempt(string username)
     {
-        if (!_lockoutEntries.TryGetValue(username, out var entry))
-        {
-            entry = new LockoutEntry();
-            _lockoutEntries[username] = entry;
-        }
+        var entry = _lockoutEntries.GetOrAdd(username, _ => new LockoutEntry());
 
-        entry.FailedAttempts++;
-        entry.LastAttemptAt = DateTime.UtcNow;
-
-        // Progressive backoff
-        var lockoutMinutes = entry.FailedAttempts switch
+        int failedAttempts;
+        lock (entry)
         {
-            >= 15 => 1440,    // 24 hours
-            >= 10 => 60,      // 1 hour
-            >= 5  => WebPortalConfiguration.AccountLockoutMinutes,
-            _     => 0
-        };
+            entry.FailedAttempts++;
+            entry.LastAttemptAt = DateTime.UtcNow;
+            failedAttempts = entry.FailedAttempts;
 
-        if (lockoutMinutes > 0)
-        {
-            entry.LockedUntil = DateTime.UtcNow.AddMinutes(lockoutMinutes);
+            // Progressive backoff
+            var lockoutMinutes = failedAttempts switch
+            {
+                >= 15 => 1440,    // 24 hours
+                >= 10 => 60,      // 1 hour
+                >= 5  => WebPortalConfiguration.AccountLockoutMinutes,
+                _     => 0
+            };
+
+            if (lockoutMinutes > 0)
+            {
+                entry.LockedUntil = DateTime.UtcNow.AddMinutes(lockoutMinutes);
+            }
         }
     }
 
     public void RecordSuccessfulLogin(string username)
     {
-        _lockoutEntries.Remove(username);
+        _lockoutEntries.TryRemove(username, out _);
     }
 
     private class LockoutEntry

@@ -1,7 +1,14 @@
+using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Server.Logging;
+using Server;
 using Server.WebPortal.Configuration;
 using Server.WebPortal.Endpoints;
 using Server.WebPortal.Middleware;
@@ -11,7 +18,7 @@ namespace Server.WebPortal;
 
 public static class WebPortalHost
 {
-    private static readonly ILogger logger = LogFactory.GetLogger(typeof(WebPortalHost));
+    private static readonly Server.Logging.ILogger logger = Server.Logging.LogFactory.GetLogger(typeof(WebPortalHost));
     private static WebApplication? _app;
 
     public static void Configure()

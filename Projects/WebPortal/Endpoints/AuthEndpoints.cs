@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Server.WebPortal.Models;
 using Server.WebPortal.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Server.WebPortal.Endpoints;
 
@@ -100,23 +103,23 @@ public static class AuthEndpoints
 
     private static void SetAuthCookies(HttpResponse response, AuthResponse authResponse)
     {
-        var cookieOptions = new CookieOptions
+        // Access token - shorter expiry
+        response.Cookies.Append("access_token", authResponse.AccessToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Path = "/"
-        };
-
-        // Access token - shorter expiry
-        response.Cookies.Append("access_token", authResponse.AccessToken, cookieOptions with
-        {
+            Path = "/",
             MaxAge = TimeSpan.FromSeconds(authResponse.ExpiresIn)
         });
 
         // Refresh token - longer expiry
-        response.Cookies.Append("refresh_token", authResponse.RefreshToken, cookieOptions with
+        response.Cookies.Append("refresh_token", authResponse.RefreshToken, new CookieOptions
         {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/",
             MaxAge = TimeSpan.FromDays(7)
         });
     }

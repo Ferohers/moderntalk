@@ -6,6 +6,7 @@
         <OutDir>..\..\Distribution\Assemblies</OutDir>
         <PublishDir>..\..\Distribution\Assemblies</PublishDir>
         <Configurations>Debug;Release;Analyze</Configurations>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />

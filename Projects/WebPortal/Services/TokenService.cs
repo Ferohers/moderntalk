@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -9,7 +10,7 @@ namespace Server.WebPortal.Services;
 
 public class TokenService
 {
-    private static readonly Dictionary<string, RefreshTokenEntry> _refreshTokens = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, RefreshTokenEntry> _refreshTokens = new(StringComparer.OrdinalIgnoreCase);
     private readonly SigningCredentials _signingCredentials;
 
     public TokenService()
@@ -45,7 +46,7 @@ public class TokenService
         var refreshToken = GenerateRefreshToken();
         var refreshTokenExpiry = now.AddDays(WebPortalConfiguration.RefreshTokenExpiryDays);
 
-        // Store refresh token (thread-safe via ConcurrentDictionary not needed - only web threads access this)
+        // Store refresh token
         _refreshTokens[refreshToken] = new RefreshTokenEntry
         {
             Username = username,
@@ -92,7 +93,7 @@ public class TokenService
 
         if (entry.ExpiresAt < DateTime.UtcNow)
         {
-            _refreshTokens.Remove(refreshToken);
+            _refreshTokens.TryRemove(refreshToken, out _);
             return null;
         }
 
@@ -101,19 +102,17 @@ public class TokenService
 
     public void InvalidateRefreshToken(string refreshToken)
     {
-        _refreshTokens.Remove(refreshToken);
+        _refreshTokens.TryRemove(refreshToken, out _);
     }
 
     public void InvalidateAllRefreshTokens(string username)
     {
-        var tokensToRemove = _refreshTokens
-            .Where(kvp => kvp.Value.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
-            .Select(kvp => kvp.Key)
-            .ToList();
-
-        foreach (var token in tokensToRemove)
+        foreach (var kvp in _refreshTokens)
         {
-            _refreshTokens.Remove(token);
+            if (kvp.Value.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
+            {
+                _refreshTokens.TryRemove(kvp.Key, out _);
+            }
         }
     }
 
