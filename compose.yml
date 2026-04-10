@@ -9,7 +9,7 @@ services:
       - "2593:2593"    # Game server
       - "8080:8080"    # Web portal
     volumes:
-      - ./gamefiles:/gamefiles
+      - /home/altan/modernuo/gamefiles:/gamefiles
       # We map the Configuration folder directly now that it generated
       - ./configuration:/app/Configuration
       - ./shard:/app/Saves
