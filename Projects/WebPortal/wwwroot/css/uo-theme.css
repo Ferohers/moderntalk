@@ -165,7 +165,6 @@ body {
     font-weight: 600;
     color: var(--text-light);
     background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-medium) 50%, var(--bg-dark) 100%);
-    border: 2px solid var(--gold-primary);
     padding: 0.6rem 1.5rem;
     cursor: pointer;
     letter-spacing: 0.05em;
@@ -312,11 +311,11 @@ body {
     gap: 0.5rem;
     padding: 0.3rem 1rem;
     font-family: var(--font-heading);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     border: 1px solid;
-    margin-top: 1rem;
+    text-decoration: none;
 }
 
 .status-online {

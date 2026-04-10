@@ -9,7 +9,10 @@
 <body>
     <header class="site-header">
         <div class="header-content">
-            <a href="/" class="site-title">ModernUO</a>
+            <a href="/" id="server-status" class="status-badge status-online">
+                <span class="status-dot"></span>
+                <span id="status-text">Sunucu durumu kontrol ediliyor...</span>
+            </a>
             <nav class="header-nav" id="main-nav">
                 <a href="/login.html" class="nav-link">GİRİŞ</a>
                 <a href="/register.html" class="nav-link uo-btn uo-btn-sm uo-btn-primary">Kayıt</a>
@@ -22,10 +25,6 @@
         <section class="hero">
             <h1 class="hero-title">Ultima Online</h1>
             <p class="hero-subtitle">Renaissance Sunucusu</p>
-            <div id="server-status" class="status-badge status-online">
-                <span class="status-dot"></span>
-                <span id="status-text">Sunucu durumu kontrol ediliyor...</span>
-            </div>
         </section>
 
         <!-- How to Connect - PRIMARY CONTENT -->
@@ -174,7 +173,7 @@
                     const statusText = document.getElementById('status-text');
                     if (info.online) {
                         statusEl.className = 'status-badge status-online';
-                        statusText.textContent = `Online — ${info.playerCount} player${info.playerCount !== 1 ? 's' : ''}`;
+                        statusText.textContent = 'Online';
                     } else {
                         statusEl.className = 'status-badge status-offline';
                         statusText.textContent = 'Offline';
