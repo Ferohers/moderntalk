@@ -12,14 +12,14 @@
             <a href="/" class="site-title">⚔ ModernUO</a>
             <nav class="header-nav">
                 <a href="/" class="nav-link">Ana Sayfa</a>
-                <span class="nav-link" style="color: var(--gold-primary);" id="nav-username">Account</span>
-                <button class="uo-btn uo-btn-sm uo-btn-danger" onclick="handleLogout()">Logout</button>
+                <span class="nav-link" style="color: var(--gold-primary);" id="nav-username">Hesap</span>
+                <button class="uo-btn uo-btn-sm uo-btn-danger" onclick="handleLogout()">Çıkış</button>
             </nav>
         </div>
     </header>
 
     <main class="main-content">
-        <h1 class="auth-title">Account Dashboard</h1>
+        <h1 class="auth-title">Hesap Yönetimi</h1>
 
         <div id="alert" class="uo-alert hidden"></div>
 
@@ -27,37 +27,37 @@
         <div class="uo-frame" style="margin-bottom: 1.5rem;">
             <div class="uo-frame-inner">
                 <h2 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                    Account Information
+                    Hesap Bilgileri
                 </h2>
                 <div class="dashboard-grid" id="account-info">
                     <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
-                        <div class="info-label">Status</div>
+                        <div class="info-label">Durum</div>
                         <div class="info-value" id="account-status">
-                            <span class="spinner"></span> Loading...
+                            <span class="spinner"></span> Yükleniyor...
                         </div>
                     </div>
                     <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
-                        <div class="info-label">Username</div>
+                        <div class="info-label">Kullanıcı Adı</div>
                         <div class="info-value" id="account-username">—</div>
                     </div>
                     <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
-                        <div class="info-label">Created</div>
+                        <div class="info-label">Oluşturulma</div>
                         <div class="info-value" id="account-created">—</div>
                     </div>
                     <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
-                        <div class="info-label">Last Login</div>
+                        <div class="info-label">Son Giriş</div>
                         <div class="info-value" id="account-lastlogin">—</div>
                     </div>
                     <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
-                        <div class="info-label">Characters</div>
+                        <div class="info-label">Karakterler</div>
                         <div class="info-value" id="account-chars">—</div>
                     </div>
                     <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
-                        <div class="info-label">Access Level</div>
+                        <div class="info-label">Hesap Tipi</div>
                         <div class="info-value" id="account-access">—</div>
                     </div>
                     <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
-                        <div class="info-label">Email</div>
+                        <div class="info-label">E-posta</div>
                         <div class="info-value" id="account-email">—</div>
                     </div>
                 </div>
@@ -68,41 +68,41 @@
         <div class="uo-frame">
             <div class="uo-frame-inner">
                 <h2 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                    Change Password
+                    Şifre Değiştir
                 </h2>
                 <form id="change-password-form" onsubmit="return handleChangePassword(event)">
                     <div class="uo-input-group">
-                        <label class="uo-label" for="current-password">Current Password</label>
+                        <label class="uo-label" for="current-password">Şimdiki Şifren</label>
                         <input type="password" id="current-password" class="uo-input" 
-                               placeholder="Enter current password" 
+                               placeholder="Şifreni gir" 
                                autocomplete="current-password" 
                                required>
                     </div>
 
                     <div class="uo-input-group">
-                        <label class="uo-label" for="new-password">New Password</label>
+                        <label class="uo-label" for="new-password">Yeni Şifre</label>
                         <input type="password" id="new-password" class="uo-input" 
-                               placeholder="Enter new password" 
+                               placeholder="Yeni şifreni gir" 
                                autocomplete="new-password" 
                                required minlength="8" maxlength="128"
                                oninput="checkPasswordStrength(this.value)">
                         <div class="password-strength">
                             <div class="password-strength-bar" id="strength-bar"></div>
                         </div>
-                        <div class="uo-input-hint" id="strength-text">Minimum 8 characters</div>
+                        <div class="uo-input-hint" id="strength-text">En az 8 karakter olmalı.</div>
                     </div>
 
                     <div class="uo-input-group">
-                        <label class="uo-label" for="confirm-new-password">Confirm New Password</label>
+                        <label class="uo-label" for="confirm-new-password">Yeni şifreni tekrar gir</label>
                         <input type="password" id="confirm-new-password" class="uo-input" 
-                               placeholder="Re-enter new password" 
+                               placeholder="Şifreyi tekrar gir" 
                                autocomplete="new-password" 
                                required minlength="8" maxlength="128">
                     </div>
 
                     <div style="text-align: center; margin-top: 1rem;">
                         <button type="submit" class="uo-btn" id="change-pw-btn">
-                            Change Password
+                            Şifreyi Değiştir
                         </button>
                     </div>
                 </form>
@@ -113,28 +113,28 @@
         <div class="uo-frame" style="margin-top: 1.5rem;">
             <div class="uo-frame-inner">
                 <h2 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                    Change Email
+                    E-posta Değiştir
                 </h2>
                 <form id="change-email-form" onsubmit="return handleChangeEmail(event)">
                     <div class="uo-input-group">
-                        <label class="uo-label" for="email-current-password">Current Password</label>
+                        <label class="uo-label" for="email-current-password">Şifreni Gir</label>
                         <input type="password" id="email-current-password" class="uo-input"
-                               placeholder="Enter current password to confirm"
+                               placeholder="Şifreni girmeden eposta değişmez"
                                autocomplete="current-password"
                                required>
                     </div>
 
                     <div class="uo-input-group">
-                        <label class="uo-label" for="new-email">New Email Address</label>
+                        <label class="uo-label" for="new-email">Yeni e-posta adresin</label>
                         <input type="email" id="new-email" class="uo-input"
-                               placeholder="Enter new email address"
+                               placeholder="Yeni adresini gir"
                                autocomplete="email"
                                required maxlength="256">
                     </div>
 
                     <div style="text-align: center; margin-top: 1rem;">
                         <button type="submit" class="uo-btn" id="change-email-btn">
-                            Update Email
+                            E-posta Güncelle
                         </button>
                     </div>
                 </form>
@@ -196,7 +196,7 @@
             bar.className = 'password-strength-bar';
 
             if (password.length === 0) {
-                text.textContent = 'Minimum 8 characters';
+                text.textContent = 'En az 8 karakter olmalı';
                 return;
             }
 
@@ -209,13 +209,13 @@
 
             if (score <= 2) {
                 bar.classList.add('strength-weak');
-                text.textContent = 'Weak — try adding numbers and symbols';
+                text.textContent = 'Zayıf — şifreni güçlendir';
             } else if (score <= 3) {
                 bar.classList.add('strength-medium');
-                text.textContent = 'Medium — consider adding more variety';
+                text.textContent = 'Orta — tavsiyemiz daha iyi olabilir';
             } else {
                 bar.classList.add('strength-strong');
-                text.textContent = 'Strong password';
+                text.textContent = 'Güclü şifre';
             }
         }
 
@@ -226,16 +226,16 @@
 
             alertEl.classList.add('hidden');
             btn.disabled = true;
-            btn.textContent = 'Changing password...';
+            btn.textContent = 'Şifre değişiyor ...';
 
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
             const confirmNewPassword = document.getElementById('confirm-new-password').value;
 
             if (newPassword !== confirmNewPassword) {
-                showAlert('New passwords do not match', 'error');
+                showAlert('Yeni şifrelerin uyuşmadı', 'error');
                 btn.disabled = false;
-                btn.textContent = 'Change Password';
+                btn.textContent = 'Şifre Değiştir';
                 return false;
             }
 
