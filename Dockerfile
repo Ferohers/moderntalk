@@ -13,8 +13,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /src
 
-# Copy local source code instead of cloning from GitHub
-COPY . .
+# Clone from the Moderntalk fork which includes the Web Portal
+RUN git clone https://github.com/Ferohers/moderntalk.git . \
+    && rm -rf .git
 
 # Make the publish script executable and run it for Linux x64
 RUN chmod +x publish.sh
