@@ -40,7 +40,7 @@ public class AuthService
         if (existingAccount != null)
         {
             // Anti-enumeration: return generic error
-            return (null, "Unable to create account. Please try a different username.");
+            return (null, "Bu hesabı açamadık. Başka bir isim deneyiniz.");
         }
 
         // Create the account on the game thread
@@ -52,7 +52,7 @@ public class AuthService
             }
             catch (Exception ex)
             {
-                logger.Warning(ex, "Failed to create account for {Username}", request.Username);
+                logger.Warning(ex, "{Username} isimli hesabı açarken sorun oldu", request.Username);
                 return null;
             }
         });
@@ -116,12 +116,12 @@ public class AuthService
             _lockoutService.RecordFailedAttempt(request.Username);
 
             // Anti-enumeration: same error message regardless of whether username exists
-            return (null, "Invalid credentials");
+            return (null, "Hatalı giriş yaptınız");
         }
 
         if (isBanned)
         {
-            return (null, "This account has been banned");
+            return (null, "Bu hesap banlanmış");
         }
 
         // Success - clear lockout and generate tokens
