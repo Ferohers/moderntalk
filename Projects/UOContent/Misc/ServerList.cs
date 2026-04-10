@@ -38,6 +38,7 @@ namespace Server.Misc
         private static IPAddress _publicAddress;
         public static string Address { get; private set; }
         public static string ServerName { get; private set; }
+        public static IPAddress PublicAddress => _publicAddress;
 
         public static bool AutoDetect { get; private set; }
 

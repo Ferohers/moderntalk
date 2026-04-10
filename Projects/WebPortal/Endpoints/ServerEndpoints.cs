@@ -32,6 +32,9 @@ public static class ServerEndpoints
                 return count;
             });
 
+            // Use auto-detected public IP, fall back to configured connection host
+            var connectionHost = ServerList.PublicAddress?.ToString() ?? WebPortalConfiguration.ConnectionHost;
+
             return Results.Ok(new ServerInfoResponse
             {
                 ServerName = WebPortalConfiguration.ServerName,
@@ -39,7 +42,7 @@ public static class ServerEndpoints
                 PlayerCount = playerCount,
                 ClientVersion = ServerConfiguration.GetOrUpdateSetting("server.clientVersion", "7.0.96.0"),
                 Expansion = Core.Expansion.ToString(),
-                ConnectionHost = WebPortalConfiguration.ConnectionHost,
+                ConnectionHost = connectionHost,
                 ConnectionPort = WebPortalConfiguration.ConnectionPort
             });
         });
