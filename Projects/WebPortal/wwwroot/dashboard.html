@@ -56,6 +56,10 @@
                         <div class="info-label">Access Level</div>
                         <div class="info-value" id="account-access">—</div>
                     </div>
+                    <div class="info-card uo-frame-inner" style="background: var(--bg-dark);">
+                        <div class="info-label">Email</div>
+                        <div class="info-value" id="account-email">—</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -104,6 +108,38 @@
                 </form>
             </div>
         </div>
+
+        <!-- Change Email -->
+        <div class="uo-frame" style="margin-top: 1.5rem;">
+            <div class="uo-frame-inner">
+                <h2 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                    Change Email
+                </h2>
+                <form id="change-email-form" onsubmit="return handleChangeEmail(event)">
+                    <div class="uo-input-group">
+                        <label class="uo-label" for="email-current-password">Current Password</label>
+                        <input type="password" id="email-current-password" class="uo-input"
+                               placeholder="Enter current password to confirm"
+                               autocomplete="current-password"
+                               required>
+                    </div>
+
+                    <div class="uo-input-group">
+                        <label class="uo-label" for="new-email">New Email Address</label>
+                        <input type="email" id="new-email" class="uo-input"
+                               placeholder="Enter new email address"
+                               autocomplete="email"
+                               required maxlength="256">
+                    </div>
+
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button type="submit" class="uo-btn" id="change-email-btn">
+                            Update Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <footer class="site-footer">
@@ -138,6 +174,7 @@
                 document.getElementById('account-lastlogin').textContent = formatDate(info.lastLogin);
                 document.getElementById('account-chars').textContent = `${info.characterCount} / ${info.maxCharacters}`;
                 document.getElementById('account-access').textContent = info.accessLevel;
+                document.getElementById('account-email').textContent = info.email || 'Not set';
 
                 const statusEl = document.getElementById('account-status');
                 if (info.banned) {
@@ -220,6 +257,41 @@
                 showAlert('An error occurred. Please try again.', 'error');
                 btn.disabled = false;
                 btn.textContent = 'Change Password';
+            }
+
+            return false;
+        }
+
+        async function handleChangeEmail(e) {
+            e.preventDefault();
+            const alertEl = document.getElementById('alert');
+            const btn = document.getElementById('change-email-btn');
+
+            alertEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            const currentPassword = document.getElementById('email-current-password').value;
+            const newEmail = document.getElementById('new-email').value.trim();
+
+            try {
+                const result = await Api.changeEmail(currentPassword, newEmail);
+                if (result.error) {
+                    showAlert(result.error, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Update Email';
+                } else {
+                    showAlert('Email updated successfully!', 'success');
+                    document.getElementById('change-email-form').reset();
+                    btn.disabled = false;
+                    btn.textContent = 'Update Email';
+                    // Refresh account info to show new email
+                    await loadAccountInfo();
+                }
+            } catch (err) {
+                showAlert('An error occurred. Please try again.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Update Email';
             }
 
             return false;

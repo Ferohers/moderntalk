@@ -48,6 +48,17 @@ public class RefreshRequest
     public string RefreshToken { get; set; } = "";
 }
 
+public class ChangeEmailRequest
+{
+    [Required(ErrorMessage = "Current password is required")]
+    public string CurrentPassword { get; set; } = "";
+
+    [Required(ErrorMessage = "New email is required")]
+    [EmailAddress(ErrorMessage = "Invalid email address")]
+    [StringLength(256)]
+    public string NewEmail { get; set; } = "";
+}
+
 public class ForgotPasswordRequest
 {
     [Required(ErrorMessage = "Username is required")]

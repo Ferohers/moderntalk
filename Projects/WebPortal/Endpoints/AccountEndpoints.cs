@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Server.WebPortal.Models;
 using Server.WebPortal.Services;
+using System.Threading.Tasks;
 
 namespace Server.WebPortal.Endpoints;
 
@@ -51,5 +52,28 @@ public static class AccountEndpoints
 
             return Results.Ok(new SuccessResponse { Message = "Password changed successfully" });
         });
+
+        group.MapPost("/change-email", async (HttpContext context, ChangeEmailRequest request, AccountService accountService) =>
+        {
+            var username = context.User.Identity?.Name;
+            if (string.IsNullOrEmpty(username))
+            {
+                return Results.Unauthorized();
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NewEmail))
+            {
+                return Results.BadRequest(new ErrorResponse { Error = "Email address is required" });
+            }
+
+            var (success, error) = await accountService.ChangeEmail(username, request);
+
+            if (!success)
+            {
+                return Results.BadRequest(new ErrorResponse { Error = error });
+            }
+
+            return Results.Ok(new SuccessResponse { Message = "Email updated successfully" });
+        }).RequireAuthorization();
     }
 }

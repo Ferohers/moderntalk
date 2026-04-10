@@ -83,4 +83,40 @@ public class AccountService
 
         return result;
     }
+
+    public async Task<(bool success, string? error)> ChangeEmail(string username, ChangeEmailRequest request)
+    {
+        // Validate new email format
+        if (string.IsNullOrWhiteSpace(request.NewEmail))
+        {
+            return (false, "Email address is required");
+        }
+
+        // Verify password and change email on game thread
+        var result = await GameThreadDispatcher.Enqueue(() =>
+        {
+            var acct = Accounts.GetAccount(username) as Account;
+            if (acct == null)
+            {
+                return (false, "Account not found");
+            }
+
+            // Verify current password for security
+            if (!acct.CheckPassword(request.CurrentPassword))
+            {
+                return (false, "Current password is incorrect");
+            }
+
+            // Set the new email
+            acct.Email = request.NewEmail;
+            return (true, (string?)null);
+        });
+
+        if (result.Item1)
+        {
+            logger.Information("Web Portal: Email changed for account '{Username}'", username);
+        }
+
+        return result;
+    }
 }

@@ -139,6 +139,19 @@ const Api = {
     },
 
     /**
+     * Change email (requires auth)
+     */
+    async changeEmail(currentPassword, newEmail) {
+        return this.request('/api/account/change-email', {
+            method: 'POST',
+            body: JSON.stringify({
+                currentPassword: currentPassword,
+                newEmail: newEmail
+            })
+        });
+    },
+
+    /**
      * Request a password reset email
      */
     async forgotPassword(username, email) {
