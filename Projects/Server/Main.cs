@@ -447,6 +447,9 @@ public static class Core
 
         AssemblyHandler.Invoke("Initialize");
 
+        // Start Web Portal (Configure and Initialize are called above via AssemblyHandler.Invoke)
+        // WebPortal has Configure() and Initialize() methods that will be automatically discovered
+        
         NetState.Start();
         PingServer.Start();
         EventSink.InvokeServerStarted();
