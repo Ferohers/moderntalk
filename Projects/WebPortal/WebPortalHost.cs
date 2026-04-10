@@ -105,11 +105,7 @@ public static class WebPortalHost
 
             // Static files (frontend) - serve before auth so public pages work
             app.UseDefaultFiles();
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                ServeUnknownFileTypes = true,
-                DefaultContentType = "text/html"
-            });
+            app.UseStaticFiles();
 
             // Auth
             app.UseAuthentication();
