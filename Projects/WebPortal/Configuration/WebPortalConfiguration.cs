@@ -10,13 +10,13 @@ public static class WebPortalConfiguration
 
     public static bool Enabled { get; private set; }
     public static int Port { get; private set; }
-    public static string JwtSecret { get; private set; }
+    public static string JwtSecret { get; private set; } = "";
     public static int MaxLoginAttemptsPerMinute { get; private set; }
     public static int AccountLockoutMinutes { get; private set; }
     public static int AccessTokenExpiryMinutes { get; private set; }
     public static int RefreshTokenExpiryDays { get; private set; }
-    public static string ServerName { get; private set; }
-    public static string ConnectionHost { get; private set; }
+    public static string ServerName { get; private set; } = "";
+    public static string ConnectionHost { get; private set; } = "";
     public static int ConnectionPort { get; private set; }
 
     public static void Configure()
