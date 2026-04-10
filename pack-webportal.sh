@@ -18,10 +18,11 @@ OUTPUT_PATH="${1:-webportal-inject.tar.gz}"
 echo "=== ModernUO Web Portal Packer ==="
 echo ""
 
-# Create a temp directory for staging
-STAGE_DIR=$(mktemp -d)
+# Create a temp directory for staging (outside the project tree)
+STAGE_DIR="$(mktemp -d /tmp/webportal-stage.XXXXXX)"
 trap "rm -rf '$STAGE_DIR'" EXIT
 
+echo "Staging directory: $STAGE_DIR"
 echo "Staging files..."
 
 # --- New files (Web Portal project) ---
@@ -33,62 +34,63 @@ mkdir -p "$STAGE_DIR/new/Projects/WebPortal/Services"
 mkdir -p "$STAGE_DIR/new/Projects/WebPortal/wwwroot/css"
 mkdir -p "$STAGE_DIR/new/Projects/WebPortal/wwwroot/js"
 
-cp "$SCRIPT_DIR/Projects/WebPortal/WebPortal.csproj" \
+# Copy with -f to avoid identical file errors on macOS
+cp -f "$SCRIPT_DIR/Projects/WebPortal/WebPortal.csproj" \
    "$STAGE_DIR/new/Projects/WebPortal/"
 
-cp "$SCRIPT_DIR/Projects/WebPortal/WebPortalHost.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/WebPortalHost.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/"
 
-cp "$SCRIPT_DIR/Projects/WebPortal/Configuration/WebPortalConfiguration.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Configuration/WebPortalConfiguration.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Configuration/"
 
-cp "$SCRIPT_DIR/Projects/WebPortal/Endpoints/AuthEndpoints.cs" \
-   "$SCRIPT_DIR/Projects/WebPortal/Endpoints/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Endpoints/AccountEndpoints.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Endpoints/AuthEndpoints.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Endpoints/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Endpoints/ServerEndpoints.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Endpoints/AccountEndpoints.cs" \
+   "$STAGE_DIR/new/Projects/WebPortal/Endpoints/"
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Endpoints/ServerEndpoints.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Endpoints/"
 
-cp "$SCRIPT_DIR/Projects/WebPortal/Middleware/AccountLockoutService.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Middleware/AccountLockoutService.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Middleware/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Middleware/RateLimitingMiddleware.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Middleware/RateLimitingMiddleware.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Middleware/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Middleware/SecurityHeadersMiddleware.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Middleware/SecurityHeadersMiddleware.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Middleware/"
 
-cp "$SCRIPT_DIR/Projects/WebPortal/Models/Requests.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Models/Requests.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Models/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Models/Responses.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Models/Responses.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Models/"
 
-cp "$SCRIPT_DIR/Projects/WebPortal/Services/GameThreadDispatcher.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Services/GameThreadDispatcher.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Services/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Services/TokenService.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Services/TokenService.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Services/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Services/AuthService.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Services/AuthService.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Services/"
-cp "$SCRIPT_DIR/Projects/WebPortal/Services/AccountService.cs" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/Services/AccountService.cs" \
    "$STAGE_DIR/new/Projects/WebPortal/Services/"
 
 # Frontend files
-cp "$SCRIPT_DIR/Projects/WebPortal/wwwroot/index.html" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/wwwroot/index.html" \
    "$STAGE_DIR/new/Projects/WebPortal/wwwroot/"
-cp "$SCRIPT_DIR/Projects/WebPortal/wwwroot/login.html" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/wwwroot/login.html" \
    "$STAGE_DIR/new/Projects/WebPortal/wwwroot/"
-cp "$SCRIPT_DIR/Projects/WebPortal/wwwroot/register.html" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/wwwroot/register.html" \
    "$STAGE_DIR/new/Projects/WebPortal/wwwroot/"
-cp "$SCRIPT_DIR/Projects/WebPortal/wwwroot/dashboard.html" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/wwwroot/dashboard.html" \
    "$STAGE_DIR/new/Projects/WebPortal/wwwroot/"
-cp "$SCRIPT_DIR/Projects/WebPortal/wwwroot/css/uo-theme.css" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/wwwroot/css/uo-theme.css" \
    "$STAGE_DIR/new/Projects/WebPortal/wwwroot/css/"
-cp "$SCRIPT_DIR/Projects/WebPortal/wwwroot/js/app.js" \
+cp -f "$SCRIPT_DIR/Projects/WebPortal/wwwroot/js/app.js" \
    "$STAGE_DIR/new/Projects/WebPortal/wwwroot/js/"
 
 # --- Install script ---
-cp "$SCRIPT_DIR/install-webportal.sh" "$STAGE_DIR/"
+cp -f "$SCRIPT_DIR/install-webportal.sh" "$STAGE_DIR/"
 
 # --- Manifest ---
-cp "$SCRIPT_DIR/WEB_PORTAL_CHANGES.md" "$STAGE_DIR/"
+cp -f "$SCRIPT_DIR/WEB_PORTAL_CHANGES.md" "$STAGE_DIR/"
 
 # Create the tar archive
 echo "Creating archive: $OUTPUT_PATH"
@@ -105,5 +107,6 @@ echo "Size:    $SIZE"
 echo "Files:   $FILES"
 echo ""
 echo "To install on a Linux machine with ModernUO:"
-echo "  1. Copy $OUTPUT_PATH to the ModernUO root directory"
-echo "  2. Run: tar -xzf $OUTPUT_PATH install-webportal.sh && ./install-webportal.sh"
+echo "  1. Copy $OUTPUT_PATH to the target machine"
+echo "  2. Extract: tar -xzf $OUTPUT_PATH"
+echo "  3. Run:     ./install-webportal.sh /path/to/modernuo"
