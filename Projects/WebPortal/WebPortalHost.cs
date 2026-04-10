@@ -92,6 +92,10 @@ public static class WebPortalHost
                                 }
                             }
 
+                            Console.WriteLine($"[JWT OnMessageReceived] Cookie: {context.Request.Cookies["access_token"]?.Substring(0, Math.Min(30, context.Request.Cookies["access_token"]?.Length ?? 0))}...");
+                            Console.WriteLine($"[JWT OnMessageReceived] Header: {context.Request.Headers["Authorization"]}");
+                            Console.WriteLine($"[JWT OnMessageReceived] Token set: {!string.IsNullOrEmpty(token)}");
+
                             if (!string.IsNullOrEmpty(token))
                             {
                                 context.Token = token;
