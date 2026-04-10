@@ -174,18 +174,18 @@
                 document.getElementById('account-lastlogin').textContent = formatDate(info.lastLogin);
                 document.getElementById('account-chars').textContent = `${info.characterCount} / ${info.maxCharacters}`;
                 document.getElementById('account-access').textContent = info.accessLevel;
-                document.getElementById('account-email').textContent = info.email || 'Not set';
+                document.getElementById('account-email').textContent = info.email || 'Girilmemiş';
 
                 const statusEl = document.getElementById('account-status');
                 if (info.banned) {
-                    statusEl.textContent = 'Banned';
+                    statusEl.textContent = 'Banlı';
                     statusEl.className = 'info-value banned';
                 } else {
-                    statusEl.textContent = 'Active';
+                    statusEl.textContent = 'Aktif';
                     statusEl.className = 'info-value active';
                 }
             } catch (err) {
-                showAlert('Failed to load account information', 'error');
+                showAlert('Bilgileri alırken hata oluştu', 'error');
             }
         }
 
@@ -269,7 +269,7 @@
 
             alertEl.classList.add('hidden');
             btn.disabled = true;
-            btn.textContent = 'Updating...';
+            btn.textContent = 'Güncelleniyor...';
 
             const currentPassword = document.getElementById('email-current-password').value;
             const newEmail = document.getElementById('new-email').value.trim();
@@ -284,12 +284,12 @@
                     showAlert('Email updated successfully!', 'success');
                     document.getElementById('change-email-form').reset();
                     btn.disabled = false;
-                    btn.textContent = 'Update Email';
+                    btn.textContent = 'E-posta güncelleme';
                     // Refresh account info to show new email
                     await loadAccountInfo();
                 }
             } catch (err) {
-                showAlert('An error occurred. Please try again.', 'error');
+                showAlert('Hata oluştu.', 'error');
                 btn.disabled = false;
                 btn.textContent = 'Update Email';
             }

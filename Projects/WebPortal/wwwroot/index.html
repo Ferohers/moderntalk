@@ -142,8 +142,8 @@
                     const nav = document.getElementById('main-nav');
                     nav.innerHTML = `
                         <span class="nav-link" style="color: var(--gold-primary);">⚔ ${accountInfo.username}</span>
-                        <a href="/dashboard.html" class="nav-link">Dashboard</a>
-                        <button class="uo-btn uo-btn-sm uo-btn-danger" onclick="Api.logout().then(() => window.location.reload())">Logout</button>
+                        <a href="/dashboard.html" class="nav-link">HESAP BİLGİLERİ</a>
+                        <button class="uo-btn uo-btn-sm uo-btn-danger" onclick="Api.logout().then(() => window.location.reload())">Çıkış</button>
                     `;
                     // Update CTA section
                     const ctaSection = document.getElementById('cta-section');
