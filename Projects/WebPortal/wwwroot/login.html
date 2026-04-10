@@ -11,15 +11,15 @@
         <div class="header-content">
             <a href="/" class="site-title">⚔ ModernUO</a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/register.html" class="nav-link">Sign Up</a>
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/register.html" class="nav-link">Kayıt</a>
             </nav>
         </div>
     </header>
 
     <main class="main-content">
         <div class="auth-container">
-            <h1 class="auth-title">Sign In</h1>
+            <h1 class="auth-title">GİRİŞ</h1>
 
             <div id="alert" class="uo-alert uo-alert-error hidden"></div>
 
@@ -27,42 +27,42 @@
                 <div class="uo-frame-inner">
                     <form id="login-form" onsubmit="return handleLogin(event)">
                         <div class="uo-input-group">
-                            <label class="uo-label" for="username">Username</label>
+                            <label class="uo-label" for="username">Kullanıcı Adı</label>
                             <input type="text" id="username" class="uo-input" 
-                                   placeholder="Enter your username" 
+                                   placeholder="kullanıcı adınızı girin" 
                                    autocomplete="username" 
                                    required minlength="3" maxlength="30">
                         </div>
 
                         <div class="uo-input-group">
-                            <label class="uo-label" for="password">Password</label>
+                            <label class="uo-label" for="password">Şifre</label>
                             <input type="password" id="password" class="uo-input" 
-                                   placeholder="Enter your password" 
+                                   placeholder="Şifrenizi girin" 
                                    autocomplete="current-password" 
                                    required minlength="8" maxlength="128">
                         </div>
 
                         <div style="text-align: center; margin-top: 1.5rem;">
                             <button type="submit" class="uo-btn uo-btn-primary" id="submit-btn" style="width: 100%;">
-                                Enter Britannia
+                                Britannia'ya GİRİŞ
                             </button>
                         </div>
 
                         <div style="text-align: center; margin-top: 1rem;">
-                            <a href="/forgot-password.html" style="color: var(--gold-primary); font-size: 0.9rem;">Forgot your password?</a>
+                            <a href="/forgot-password.html" style="color: var(--gold-primary); font-size: 0.9rem;">Şifreni unuttun?</a>
                         </div>
                     </form>
                 </div>
             </div>
 
             <div class="auth-footer">
-                <p>New to this realm? <a href="/register.html">Create an account</a></p>
+                <p>Yoksa hesabın yok mu? <a href="/register.html">Hemen kayıt ol!</a></p>
             </div>
         </div>
     </main>
 
     <footer class="site-footer">
-        <p>Powered by <a href="https://modernuo.com" target="_blank" rel="noopener">ModernUO</a></p>
+        <p>Gücünü ModernUO'dan almakta.</p>
     </footer>
 
     <script src="/js/app.js"></script>
@@ -81,7 +81,7 @@
             
             alertEl.classList.add('hidden');
             btn.disabled = true;
-            btn.textContent = 'Signing in...';
+            btn.textContent = 'Giriş yapılıyor...';
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
@@ -97,7 +97,7 @@
                     window.location.href = '/dashboard.html';
                 }
             } catch (err) {
-                alertEl.textContent = 'An error occurred. Please try again.';
+                alertEl.textContent = 'Hata oluştu.';
                 alertEl.classList.remove('hidden');
                 btn.disabled = false;
                 btn.textContent = 'Enter Britannia';

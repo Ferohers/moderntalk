@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ModernUO - Create Account</title>
+    <title>ModernUO - Yeni Hesap Açılışı</title>
     <link rel="stylesheet" href="/css/uo-theme.css">
 </head>
 <body>
@@ -11,15 +11,15 @@
         <div class="header-content">
             <a href="/" class="site-title">⚔ ModernUO</a>
             <nav class="header-nav">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/login.html" class="nav-link">Login</a>
+                <a href="/" class="nav-link">Ana Sayfa</a>
+                <a href="/login.html" class="nav-link">GİRİŞ</a>
             </nav>
         </div>
     </header>
 
     <main class="main-content">
         <div class="auth-container">
-            <h1 class="auth-title">Create Account</h1>
+            <h1 class="auth-title">Yeni hesap açılışı</h1>
 
             <div id="alert" class="uo-alert uo-alert-error hidden"></div>
 
@@ -27,47 +27,47 @@
                 <div class="uo-frame-inner">
                     <form id="register-form" onsubmit="return handleRegister(event)">
                         <div class="uo-input-group">
-                            <label class="uo-label" for="username">Username</label>
+                            <label class="uo-label" for="username">Kullanıcı Adı</label>
                             <input type="text" id="username" class="uo-input" 
-                                   placeholder="Choose a username" 
+                                   placeholder="Hesap adını seç" 
                                    autocomplete="username" 
                                    required minlength="3" maxlength="30"
                                    pattern="[^\s<>:\"/\\|?*]+">
-                            <div class="uo-input-hint">3-30 characters. No spaces at start/end, no trailing period. Cannot contain: < > : " / \ | ? *</div>
+                            <div class="uo-input-hint">En az 3 en çok 30 karakter olabilir. Boşluk ve özel karakterler içermemeli.</div>
                         </div>
 
                         <div class="uo-input-group">
-                            <label class="uo-label" for="password">Password</label>
+                            <label class="uo-label" for="password">ŞİFRENİ Gir</label>
                             <input type="password" id="password" class="uo-input" 
-                                   placeholder="Choose a password" 
+                                   placeholder="Şifreni oluştur" 
                                    autocomplete="new-password" 
                                    required minlength="8" maxlength="128"
                                    oninput="checkPasswordStrength(this.value)">
                             <div class="password-strength">
                                 <div class="password-strength-bar" id="strength-bar"></div>
                             </div>
-                            <div class="uo-input-hint" id="strength-text">Minimum 8 characters</div>
+                            <div class="uo-input-hint" id="strength-text">En az 8 haneli olmalı.</div>
                         </div>
 
                         <div class="uo-input-group">
-                            <label class="uo-label" for="confirm-password">Confirm Password</label>
+                            <label class="uo-label" for="confirm-password">ŞİFRENİ Tekrar GİR</label>
                             <input type="password" id="confirm-password" class="uo-input" 
-                                   placeholder="Re-enter your password" 
+                                   placeholder="Şifreni tekrarla" 
                                    autocomplete="new-password" 
                                    required minlength="8" maxlength="128">
                         </div>
 
                         <div class="uo-input-group">
-                            <label class="uo-label" for="email">Email <span style="color: var(--text-dim); text-transform: none; font-family: var(--font-body);">(optional)</span></label>
+                            <label class="uo-label" for="email">E-posta <span style="color: var(--text-dim); text-transform: none; font-family: var(--font-body);">(opsiyonel)</span></label>
                             <input type="email" id="email" class="uo-input" 
-                                   placeholder="your@email.com" 
+                                   placeholder="sifre@sifirlama.com" 
                                    autocomplete="email" 
                                    maxlength="256">
                         </div>
 
                         <div style="text-align: center; margin-top: 1.5rem;">
                             <button type="submit" class="uo-btn uo-btn-primary" id="submit-btn" style="width: 100%;">
-                                Create Account
+                                HESAP OLUŞTUR
                             </button>
                         </div>
                     </form>
@@ -75,13 +75,13 @@
             </div>
 
             <div class="auth-footer">
-                <p>Already have an account? <a href="/login.html">Sign in</a></p>
+                <p>Hesaba giriş mi yapacaktın? <a href="/login.html">GİRİŞ</a></p>
             </div>
         </div>
     </main>
 
     <footer class="site-footer">
-        <p>Powered by <a href="https://modernuo.com" target="_blank" rel="noopener">ModernUO</a></p>
+        <p>Gücünü ModernUO'dan almakta.</p>
     </footer>
 
     <script src="/js/app.js"></script>
@@ -100,7 +100,7 @@
             bar.className = 'password-strength-bar';
 
             if (password.length === 0) {
-                text.textContent = 'Minimum 8 characters';
+                text.textContent = 'En az 8 karakter olmalı';
                 return;
             }
 
@@ -113,13 +113,13 @@
 
             if (score <= 2) {
                 bar.classList.add('strength-weak');
-                text.textContent = 'Weak — try adding numbers and symbols';
+                text.textContent = 'Zayıf — daha zorlu olmasını tavsiye ederiz';
             } else if (score <= 3) {
                 bar.classList.add('strength-medium');
-                text.textContent = 'Medium — consider adding more variety';
+                text.textContent = 'Ortalama — daha iyi olabilir';
             } else {
                 bar.classList.add('strength-strong');
-                text.textContent = 'Strong password';
+                text.textContent = 'Güçlü Şifre';
             }
         }
 
@@ -130,7 +130,7 @@
             
             alertEl.classList.add('hidden');
             btn.disabled = true;
-            btn.textContent = 'Creating account...';
+            btn.textContent = 'Hesap oluşturuluyor...';
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
@@ -139,10 +139,10 @@
 
             // Client-side validation
             if (password !== confirmPassword) {
-                alertEl.textContent = 'Passwords do not match';
+                alertEl.textContent = 'Şifreler uyuşmadı';
                 alertEl.classList.remove('hidden');
                 btn.disabled = false;
-                btn.textContent = 'Create Account';
+                btn.textContent = 'Hesap Aç';
                 return false;
             }
 
@@ -157,7 +157,7 @@
                     window.location.href = '/dashboard.html';
                 }
             } catch (err) {
-                alertEl.textContent = 'An error occurred. Please try again.';
+                alertEl.textContent = 'Hata oluştu.';
                 alertEl.classList.remove('hidden');
                 btn.disabled = false;
                 btn.textContent = 'Create Account';
