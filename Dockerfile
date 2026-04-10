@@ -1,31 +1,27 @@
 # -- Stage 1: Build Environment --
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
-# Install the required native dependencies
-RUN apt-get update && apt-get install -y \
-    libicu-dev \
-    libdeflate-dev \
-    zstd \
-    libargon2-dev \
-    liburing-dev \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /src
 
-# Clone from the Moderntalk fork which includes the Web Portal
-RUN git clone https://github.com/Ferohers/moderntalk.git . \
-    && rm -rf .git
+# Copy the entire project into the container (respects .dockerignore)
+COPY . .
 
-# Make the publish script executable and run it for Linux x64
-RUN chmod +x publish.sh
-RUN ./publish.sh release linux x64
+# Publish the Application project directly for Linux x64.
+# We bypass publish.sh / BuildTool because:
+#   - publish.sh tries to download a native build-tool binary from GitHub releases
+#   - It falls back to `dotnet run --project BuildTool.csproj` which runs prerequisite
+#     checks, `dotnet tool restore`, and schema generation — all unnecessary in Docker
+#   - The BuildTool staleness check requires git history which is excluded by .dockerignore
+RUN dotnet publish Projects/Application/Application.csproj \
+    -c Release \
+    -r linux-x64 \
+    --self-contained=false
 
 # -- Stage 2: Runtime Environment --
-# Changed from runtime to aspnet since we now use ASP.NET Core (Kestrel) for the web portal
+# Using aspnet image since we use ASP.NET Core (Kestrel) for the web portal
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
-# Install the same native dependencies
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     libicu-dev \
     libdeflate-dev \
@@ -36,7 +32,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy the completely prepared Distribution folder from the build stage
+# Copy the published Distribution folder from the build stage
 COPY --from=build /src/Distribution .
 
 # Expose both the game server port and the web portal port
