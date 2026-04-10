@@ -106,15 +106,21 @@ public static class WebPortalHost
                         OnAuthenticationFailed = context =>
                         {
                             Console.WriteLine($"[JWT FAILED] {context.Exception.GetType().Name}: {context.Exception.Message}");
+                            Console.WriteLine($"[JWT FAILED] Stack: {context.Exception.StackTrace?.Substring(0, Math.Min(500, context.Exception.StackTrace?.Length ?? 0))}");
                             if (context.Exception.InnerException != null)
                             {
                                 Console.WriteLine($"[JWT FAILED] Inner: {context.Exception.InnerException.Message}");
                             }
-                            return Task.CompletedTask;
+                            context.NoResult();
+                            context.HandleResponse();
+                            context.Response.StatusCode = 401;
+                            return context.Response.WriteAsJsonAsync(new { error = context.Exception.Message });
                         },
                         OnChallenge = context =>
                         {
                             Console.WriteLine($"[JWT CHALLENGE] AuthFailure: {context.AuthenticateFailure?.Message}");
+                            Console.WriteLine($"[JWT CHALLENGE] Error: {context.Error}");
+                            Console.WriteLine($"[JWT CHALLENGE] ErrorDescription: {context.ErrorDescription}");
                             return Task.CompletedTask;
                         }
                     };
