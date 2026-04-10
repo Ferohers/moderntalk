@@ -105,12 +105,16 @@ public static class AuthEndpoints
 
     private static void SetAuthCookies(HttpResponse response, AuthResponse authResponse)
     {
+        // Web portal runs on plain HTTP (Kestrel), so Secure must be false
+        // If you add a reverse proxy with HTTPS later, set this to true
+        const bool secure = false;
+
         // Access token - shorter expiry
         response.Cookies.Append("access_token", authResponse.AccessToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
+            Secure = secure,
+            SameSite = SameSiteMode.Lax,
             Path = "/",
             MaxAge = TimeSpan.FromSeconds(authResponse.ExpiresIn)
         });
@@ -119,8 +123,8 @@ public static class AuthEndpoints
         response.Cookies.Append("refresh_token", authResponse.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
+            Secure = secure,
+            SameSite = SameSiteMode.Lax,
             Path = "/",
             MaxAge = TimeSpan.FromDays(7)
         });
