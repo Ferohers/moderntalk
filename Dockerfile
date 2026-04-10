@@ -17,6 +17,13 @@ RUN dotnet publish Projects/Application/Application.csproj \
     -r linux-x64 \
     --self-contained=false
 
+# Also publish the WebPortal project to include its DLL and dependencies
+RUN dotnet publish Projects/WebPortal/WebPortal.csproj \
+    -c Release \
+    -r linux-x64 \
+    --self-contained=false \
+    -o /webportal-publish
+
 # -- Stage 2: Runtime Environment --
 # Using aspnet image since we use ASP.NET Core (Kestrel) for the web portal
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
@@ -34,6 +41,10 @@ WORKDIR /app
 
 # Copy the published Distribution folder from the build stage
 COPY --from=build /src/Distribution .
+
+# Copy WebPortal outputs (DLL and wwwroot)
+COPY --from=build /webportal-publish/WebPortal.dll ./Assemblies/WebPortal.dll
+COPY --from=build /src/Projects/WebPortal/wwwroot ./wwwroot
 
 # Expose both the game server port and the web portal port
 EXPOSE 2593
