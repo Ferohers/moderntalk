@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -146,6 +147,25 @@ public static class WebPortalHost
             app.MapAuthEndpoints();
             app.MapAccountEndpoints();
             app.MapServerEndpoints();
+
+            // Debug endpoint to inspect JWT config
+            app.MapGet("/debug/jwt", async (HttpContext ctx) =>
+            {
+                var cookie = ctx.Request.Cookies["access_token"];
+                var authHeader = ctx.Request.Headers["Authorization"].ToString();
+                var user = ctx.User?.Identity;
+                var identity = ctx.User?.Identity as System.Security.Claims.ClaimsIdentity;
+                var claims = identity?.Claims.Select(c => $"{c.Type}={c.Value}").ToArray();
+                return Results.Ok(new
+                {
+                    CookieLength = cookie?.Length ?? 0,
+                    HasAuthHeader = !string.IsNullOrEmpty(authHeader),
+                    AuthHeader = authHeader,
+                    UserIdentity = user?.Name,
+                    IsAuthenticated = user?.IsAuthenticated,
+                    Claims = claims
+                });
+            });
 
             _app = app;
 
