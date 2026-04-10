@@ -30,8 +30,6 @@
         <ProjectReference Include="..\UOContent\UOContent.csproj" Private="false" PrivateAssets="All" IncludeAssets="None">
             <IncludeInPackage>false</IncludeInPackage>
         </ProjectReference>
-        <ProjectReference Include="..\WebPortal\WebPortal.csproj" Private="false" PrivateAssets="All" IncludeAssets="None">
-            <IncludeInPackage>false</IncludeInPackage>
-        </ProjectReference>
+        <ProjectReference Include="..\WebPortal\WebPortal.csproj" />
     </ItemGroup>
 </Project>
