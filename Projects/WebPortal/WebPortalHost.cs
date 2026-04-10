@@ -80,7 +80,6 @@ public static class WebPortalHost
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };
 
-                    // Read token from cookie or Authorization header
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
@@ -88,7 +87,6 @@ public static class WebPortalHost
                             var token = context.Request.Cookies["access_token"];
                             if (string.IsNullOrEmpty(token))
                             {
-                                // Fall back to Authorization header
                                 var authHeader = context.Request.Headers["Authorization"].ToString();
                                 if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -101,6 +99,20 @@ public static class WebPortalHost
                                 context.Token = token;
                             }
 
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            Console.WriteLine($"[JWT FAILED] {context.Exception.GetType().Name}: {context.Exception.Message}");
+                            if (context.Exception.InnerException != null)
+                            {
+                                Console.WriteLine($"[JWT FAILED] Inner: {context.Exception.InnerException.Message}");
+                            }
+                            return Task.CompletedTask;
+                        },
+                        OnChallenge = context =>
+                        {
+                            Console.WriteLine($"[JWT CHALLENGE] AuthFailure: {context.AuthenticateFailure?.Message}");
                             return Task.CompletedTask;
                         }
                     };
