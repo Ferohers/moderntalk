@@ -26,11 +26,11 @@ public class SecurityHeadersMiddleware
         // Disable unnecessary browser features
         context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
 
-        // Content Security Policy - allow self and inline styles only
+        // Content Security Policy - allow self and inline styles/scripts
         context.Response.Headers["Content-Security-Policy"] =
             "default-src 'self'; " +
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-            "script-src 'self'; " +
+            "script-src 'self' 'unsafe-inline'; " +
             "font-src 'self' https://fonts.gstatic.com; " +
             "img-src 'self' data:; " +
             "connect-src 'self'";
