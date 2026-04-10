@@ -168,22 +168,13 @@
                     document.getElementById('player-count').textContent = info.playerCount;
                     document.getElementById('expansion').textContent = info.expansion;
                     document.getElementById('client-version').textContent = info.clientVersion;
-
-                    const statusEl = document.getElementById('server-status');
-                    const statusText = document.getElementById('status-text');
-                    if (info.online) {
-                        statusEl.className = 'status-badge status-online';
-                        statusText.textContent = 'Online';
-                    } else {
-                        statusEl.className = 'status-badge status-offline';
-                        statusText.textContent = 'Offline';
-                    }
                 }
             } catch (e) {
-                const statusEl = document.getElementById('server-status');
-                statusEl.className = 'status-badge status-offline';
-                document.getElementById('status-text').textContent = 'Unable to reach server';
+                // Server info load failed
             }
+
+            // Update server status badge
+            initServerStatus();
         });
     </script>
 </body>

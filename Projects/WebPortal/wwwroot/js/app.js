@@ -194,3 +194,33 @@ const Api = {
         }
     }
 };
+
+/**
+ * Initialize the server status badge in the header.
+ * Looks for #server-status and #status-text elements and updates them
+ * based on the /api/server/info response.
+ */
+async function initServerStatus() {
+    const statusEl = document.getElementById('server-status');
+    const statusText = document.getElementById('status-text');
+    if (!statusEl || !statusText) return;
+
+    try {
+        const info = await Api.getServerInfo();
+        if (info && !info.error) {
+            if (info.online) {
+                statusEl.className = 'status-badge status-online';
+                statusText.textContent = 'Çalışıyor';
+            } else {
+                statusEl.className = 'status-badge status-offline';
+                statusText.textContent = 'Kapalı';
+            }
+        } else {
+            statusEl.className = 'status-badge status-offline';
+            statusText.textContent = 'Kapalı';
+        }
+    } catch (e) {
+        statusEl.className = 'status-badge status-offline';
+        statusText.textContent = 'Unable to reach server';
+    }
+}
