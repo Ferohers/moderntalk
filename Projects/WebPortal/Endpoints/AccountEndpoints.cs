@@ -73,7 +73,7 @@ public static class AccountEndpoints
                 return Results.BadRequest(new ErrorResponse { Error = error });
             }
 
-            return Results.Ok(new SuccessResponse { Message = "Email updated successfully" });
+            return Results.Ok(new SuccessResponse { Message = "Eposta değişimi yapıldı" });
         }).RequireAuthorization();
     }
 }
