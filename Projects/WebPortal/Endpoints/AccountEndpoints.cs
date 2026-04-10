@@ -10,12 +10,13 @@ public static class AccountEndpoints
 {
     public static void MapAccountEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/api/account").RequireAuthorization();
+        var group = app.MapGroup("/api/account");
 
         group.MapGet("/info", async (HttpContext context, AccountService accountService) =>
         {
-            var username = context.User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
-            if (username == null)
+            var username = context.User?.Identity?.Name ??
+                          context.User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(username))
             {
                 return Results.Unauthorized();
             }
@@ -32,8 +33,9 @@ public static class AccountEndpoints
 
         group.MapPost("/change-password", async (HttpContext context, ChangePasswordRequest request, AccountService accountService) =>
         {
-            var username = context.User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
-            if (username == null)
+            var username = context.User?.Identity?.Name ??
+                          context.User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(username))
             {
                 return Results.Unauthorized();
             }

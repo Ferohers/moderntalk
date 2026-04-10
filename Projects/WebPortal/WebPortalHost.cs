@@ -148,7 +148,7 @@ public static class WebPortalHost
             app.MapAccountEndpoints();
             app.MapServerEndpoints();
 
-            // Debug endpoint to inspect JWT config
+            // Debug endpoint to inspect JWT config - requires auth
             app.MapGet("/debug/jwt", async (HttpContext ctx) =>
             {
                 var cookie = ctx.Request.Cookies["access_token"];
@@ -165,7 +165,7 @@ public static class WebPortalHost
                     IsAuthenticated = user?.IsAuthenticated,
                     Claims = claims
                 });
-            });
+            }).RequireAuthorization();
 
             _app = app;
 
