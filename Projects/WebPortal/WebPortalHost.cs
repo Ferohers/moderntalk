@@ -72,10 +72,8 @@ public static class WebPortalHost
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = true,
-                        ValidIssuer = "ModernUO",
-                        ValidateAudience = true,
-                        ValidAudience = "ModernUO-WebPortal",
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromMinutes(1)
                     };
