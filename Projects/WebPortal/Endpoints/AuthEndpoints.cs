@@ -76,12 +76,12 @@ public static class AuthEndpoints
             }
 
             // Generate new tokens
-            var (accessToken, refreshToken, expiresIn) = tokenService.GenerateTokens(username!);
+            var (accessToken, newRefreshToken, expiresIn) = tokenService.GenerateTokens(username!);
 
             var authResponse = new AuthResponse
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken,
+                RefreshToken = newRefreshToken,
                 ExpiresIn = expiresIn,
                 Username = username!
             };
