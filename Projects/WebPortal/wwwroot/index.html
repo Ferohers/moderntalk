@@ -9,10 +9,10 @@
 <body>
     <header class="site-header">
         <div class="header-content">
-            <a href="/" id="server-status" class="status-badge status-online">
+            <div id="server-status" class="status-badge status-online">
                 <span class="status-dot"></span>
                 <span id="status-text">Sunucu kontrol ...</span>
-            </a>
+            </div>
             <nav class="header-nav" id="main-nav">
                 <a href="/login.html" class="nav-link">GİRİŞ</a>
                 <a href="/register.html" class="nav-link uo-btn uo-btn-sm uo-btn-primary">Hesap Aç</a>
@@ -173,10 +173,10 @@
                     const statusText = document.getElementById('status-text');
                     if (info.online) {
                         statusEl.className = 'status-badge status-online';
-                        statusText.textContent = 'Online';
+                        statusText.textContent = 'Sunucu Aktif';
                     } else {
                         statusEl.className = 'status-badge status-offline';
-                        statusText.textContent = 'Offline';
+                        statusText.textContent = 'Sunucu Çökmüş';
                     }
                 }
             } catch (e) {
