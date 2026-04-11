@@ -320,74 +320,20 @@ body {
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    border: 1px solid;
     text-decoration: none;
-    position: relative;
-    z-index: 0;
-    border: none;
-    background: none;
-    overflow: hidden;
 }
 
-.status-badge::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 200%;
-    height: 200%;
-    transform: translate(-50%, -50%);
-    z-index: -2;
-}
-
-.status-badge::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    z-index: -1;
-}
-
-/* Loading state - gold pulsing border */
-.status-loading {
-    color: var(--gold-light);
-}
-
-.status-loading::before {
-    background: var(--gold-dim);
-}
-
-.status-loading::after {
-    background: var(--bg-dark);
-    box-shadow: inset 0 0 10px rgba(200, 168, 72, 0.15);
-}
-
-/* Online state - green running border */
 .status-online {
-    color: #48A848;
+    color: var(--gold-light);
+    border-color: var(--gold-light);
+    background: rgba(200, 168, 72, 0.1);
 }
 
-.status-online::before {
-    background: conic-gradient(transparent 40%, #48A848 50%, transparent 60%);
-    animation: border-spin 3s linear infinite;
-}
-
-.status-online::after {
-    background: var(--bg-dark);
-    box-shadow: inset 0 0 10px rgba(72, 168, 72, 0.15);
-}
-
-/* Offline state - red running border */
 .status-offline {
     color: var(--text-error);
-}
-
-.status-offline::before {
-    background: conic-gradient(transparent 40%, #D44848 50%, transparent 60%);
-    animation: border-spin 3s linear infinite;
-}
-
-.status-offline::after {
-    background: var(--bg-dark);
-    box-shadow: inset 0 0 10px rgba(212, 72, 72, 0.15);
+    border-color: var(--text-error);
+    background: rgba(212, 72, 72, 0.1);
 }
 
 .status-dot {
@@ -395,31 +341,12 @@ body {
     height: 8px;
     border-radius: 50%;
     background: currentColor;
-    position: relative;
-    z-index: 1;
-}
-
-.status-badge span {
-    position: relative;
-    z-index: 1;
-}
-
-.status-loading .status-dot {
     animation: pulse 2s infinite;
-}
-
-.status-offline .status-dot {
-    animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
-}
-
-@keyframes border-spin {
-    from { transform: translate(-50%, -50%) rotate(0deg); }
-    to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 /* === How to Connect Section === */
