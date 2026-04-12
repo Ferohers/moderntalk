@@ -6,11 +6,11 @@ services:
     container_name: modernuo_server
     restart: unless-stopped
     ports:
-      - "2593:2593"    # Game server
-      - "8080:8080"    # Web portal
+      - "2593:2593"    # Game server (UO client protocol)
+      - "8080:8080"    # Web portal (HTTP)
     volumes:
-      - /home/altan/modernuo/gamefiles:/gamefiles
-      # We map the Configuration folder directly now that it generated
+      - ./gamefiles:/gamefiles
+      # Map the Configuration folder for easy editing
       - ./configuration:/app/Configuration
       - ./shard:/app/Saves
     environment:

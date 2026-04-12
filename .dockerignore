@@ -1,50 +1,29 @@
 # Build outputs
 **/bin/
 **/obj/
-**/out/
+
+# Git
+.git/
+.gitignore
+
+# Docker files themselves
+Dockerfile
+compose.yml
+.dockerignore
+
+# Documentation
+*.md
+!README.md
 
 # IDE
 .vs/
 .vscode/
 .idea/
 *.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# Git
-.git/
-.gitignore
-
-# Docker
-Dockerfile
-docker-compose*.yml
-.dockerignore
-
-# Documentation
-*.md
-!README.md
-dev-docs/
-plans/
-
-# CI/CD
-.github/
-azure-pipelines.yml
 
 # OS files
 .DS_Store
 Thumbs.db
-
-# Archives
-*.zip
-*.tar.gz
-*.rar
-
-# Rider
-rider-settings.zip
-
-# Test projects
-**/Tests/
 
 # Config that shouldn't be in image
 configuration/

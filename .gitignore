@@ -1,50 +1,26 @@
-# Distribution Files
-/Distribution/Logger
-/Distribution/Logger.*
-/Distribution/ModernUO
-/Distribution/ModernUO.*
-/Distribution/Server
-/Distribution/Server.*
-/Distribution/Assemblies
-/Distribution/bsdtar
-/Distribution/Configuration/antimacro.json
-/Distribution/Configuration/assistants.json
-/Distribution/Configuration/expansion.json
-/Distribution/Configuration/modernuo.json
-/Distribution/Configuration/email-settings.json
-/Distribution/Configuration/throttles.json
-/Distribution/Configuration/tot.json
-/Distribution/Logs
-/Distribution/Archives
-/Distribution/Backups
-/Distribution/Saves
-/Distribution/docs
-/Distribution/temp
-/Distribution/*.dylib
-/Distribution/*.so
-/Distribution/*.dll
-/Distribution/*.exe
-/Distribution/runtimes
-/Distribution/nohup.out
-/Distribution/ref
-/Distribution/web
+# Build outputs
+**/bin/
+**/obj/
+**/out/
 
-/Projects/*/obj
-/Projects/*/bin
-/Projects/*/Generated
-
-*.swp
-*.log
+# IDE
+.vs/
+.vscode/
+.idea/
 *.user
-/.idea
-/.vs
-/.vscode
-/.claude
+*.suo
+.claude/
 
+# OS files
 .DS_Store
+Thumbs.db
 
-/packages/*
-/Distribution/Configuration/server-access.json
+# Runtime data (mounted as Docker volumes)
+gamefiles/
+shard/
+configuration/
 
-# BuildTool native binaries (downloaded from GitHub Releases)
-/tools/
+# Archives
+*.zip
+*.tar.gz
+*.rar
