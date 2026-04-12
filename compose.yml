@@ -1,8 +1,11 @@
 services:
   modernuo:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # Pre-built image from GitHub Container Registry
+    # To build locally instead, comment the image line and uncomment the build section
+    image: ghcr.io/ferohers/moderntalk:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     container_name: modernuo_server
     restart: unless-stopped
     ports:

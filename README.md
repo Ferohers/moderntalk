@@ -6,10 +6,13 @@ A web portal overlay for [ModernUO](https://github.com/modernuo/ModernUO) that a
 
 This is **not** a fork of ModernUO. It's an overlay that contains only the WebPortal project. The Dockerfile clones both upstream ModernUO and this repo at build time, injects the WebPortal into it, and builds everything inside the container.
 
+**Pre-built Docker images** are available on GitHub Container Registry — no local build needed.
+
 ```
 moderntalk/
+├── .github/workflows/      # CI: auto-builds Docker image on push
 ├── Dockerfile              # Clones both repos, injects WebPortal, builds
-├── compose.yml             # Docker Compose with ports 2593 + 8080
+├── compose.yml             # Pulls pre-built image from ghcr.io
 ├── Projects/WebPortal/     # The WebPortal project (our code)
 └── configuration/          # Sample configuration files
 ```
@@ -19,14 +22,13 @@ moderntalk/
 ```bash
 git clone https://github.com/Ferohers/moderntalk.git
 cd moderntalk
-docker compose build
 docker compose up -d
 ```
 
 - **Game server**: `localhost:2593` (UO client)
 - **Web portal**: `http://localhost:8080` (browser)
 
-> 💡 The Dockerfile clones both [ModernUO](https://github.com/modernuo/ModernUO) and [moderntalk](https://github.com/Ferohers/moderntalk) from GitHub inside the container. Your local directory stays clean — no build artifacts on the host.
+> 💡 The compose.yml pulls the pre-built image from `ghcr.io/ferohers/moderntalk:latest`. GitHub Actions builds it automatically on every push to `main`.
 
 ## Features
 
@@ -70,6 +72,10 @@ The Dockerfile clones both repos inside the container:
 5. Builds everything together with `dotnet publish`
 
 At runtime, ModernUO's `AssemblyHandler` auto-loads `WebPortal.dll` from `Assemblies/` and calls its `Configure()` and `Initialize()` methods, starting Kestrel on port 8080.
+
+## CI/CD
+
+GitHub Actions automatically builds and pushes the Docker image to `ghcr.io/ferohers/moderntalk` on every push to `main`. You can also trigger a build manually from the Actions tab.
 
 ## License
 
