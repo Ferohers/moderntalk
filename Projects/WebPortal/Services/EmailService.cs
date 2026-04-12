@@ -32,19 +32,19 @@ public class EmailService
 
         var resetUrl = $"{baseUrl.TrimEnd('/')}/reset-password.html?token={Uri.EscapeDataString(resetToken)}";
 
-        var subject = $"{WebPortalConfiguration.ServerName} — Password Reset";
+        var subject = $"Chorlu — Password Reset";
         var body = $@"
-Hello {username},
+Selamlar {username}!,
 
-A password reset was requested for your account on {WebPortalConfiguration.ServerName}.
+UO sunucumuzda bulunan bağlantıdan şifre sıfırlama talebinde bulundun.
 
-Click the link below to reset your password. This link will expire in 15 minutes.
+Alağıda bulunan bağlantıdan şifreni sıfırlayabilirsin.
 
 {resetUrl}
 
-If you did not request this reset, you can safely ignore this email. Your password will not be changed.
+Eğer bu e-postayı sen göndermediysen merak etme, hesabında bir değişiklik  yapılmadı.
 
-— {WebPortalConfiguration.ServerName}
+— Chorlu UO Sunucusu
 ";
 
         return await SendEmail(toEmail, subject, body);
