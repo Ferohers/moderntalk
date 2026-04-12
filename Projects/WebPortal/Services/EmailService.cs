@@ -23,11 +23,11 @@ public class EmailService
             return false;
         }
 
-        var baseUrl = WebPortalConfiguration.PasswordResetBaseUrl;
+        var baseUrl = WebPortalConfiguration.PublicBaseUrl;
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
-            // Fall back to the connection host
-            baseUrl = $"http://{WebPortalConfiguration.ConnectionHost}:{WebPortalConfiguration.Port}";
+            logger.Warning("Web Portal: Cannot send password reset email — webPortal.publicBaseUrl is not configured. Set it to your public-facing URL (e.g. https://chorlu.com)");
+            return false;
         }
 
         var resetUrl = $"{baseUrl.TrimEnd('/')}/reset-password.html?token={Uri.EscapeDataString(resetToken)}";

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -57,6 +58,23 @@ public static class WebPortalHost
 
             // Suppress default console logging to avoid cluttering game server output
             builder.Logging.ClearProviders();
+
+            // Configure forwarded headers when behind a reverse proxy (Cloudflare, nginx, etc.)
+            // This must be registered BEFORE building the app so the middleware pipeline is correct.
+            if (WebPortalConfiguration.BehindReverseProxy)
+            {
+                builder.Services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                        | ForwardedHeaders.XForwardedProto
+                        | ForwardedHeaders.XForwardedHost;
+
+                    // Trust all proxies — Cloudflare IPs change frequently and the server
+                    // is not directly exposed to the internet, so spoofing is not a concern.
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                });
+            }
 
             // Add services
             builder.Services.AddSingleton<TokenService>();
@@ -118,6 +136,12 @@ public static class WebPortalHost
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
+
+            // Forwarded headers must be first so all downstream middleware sees real client IPs
+            if (WebPortalConfiguration.BehindReverseProxy)
+            {
+                app.UseForwardedHeaders();
+            }
 
             // Security middleware - order matters
             app.UseMiddleware<SecurityHeadersMiddleware>();
