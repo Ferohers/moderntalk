@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Server;
 using Server.Accounting;
-using Server.Misc;
 using Server.WebPortal.Configuration;
 using Server.WebPortal.Models;
 using Server.WebPortal.Services;
@@ -33,8 +32,8 @@ public static class ServerEndpoints
                 return count;
             });
 
-            // Use auto-detected public IP, fall back to configured connection host
-            var connectionHost = ServerList.PublicAddress?.ToString() ?? WebPortalConfiguration.ConnectionHost;
+            // Use the configured connection host
+            var connectionHost = WebPortalConfiguration.ConnectionHost;
 
             return Results.Ok(new ServerInfoResponse
             {
