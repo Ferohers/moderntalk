@@ -1,37 +1,31 @@
 # -- Stage 1: Build Environment --
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
-# Install native dependencies + git for cloning
-RUN apt-get update && apt-get install -y \
-    libicu-dev \
-    libdeflate-dev \
-    zstd \
-    libargon2-dev \
-    liburing-dev \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /src
 
-# Clone upstream ModernUO — gets latest updates automatically on rebuild
-RUN git clone https://github.com/modernuo/ModernUO.git .
+# Copy the entire project into the container (respects .dockerignore)
+COPY . .
 
-# Copy our WebPortal project into the cloned source tree
-COPY Projects/WebPortal/ Projects/WebPortal/
-
-# Patch Application.csproj to include WebPortal:
-#   1. Add FrameworkReference for ASP.NET Core (needed for Kestrel runtime)
-#   2. Add ProjectReference to WebPortal project
-RUN sed -i '/<ItemGroup>/a \    <FrameworkReference Include="Microsoft.AspNetCore.App" />' Projects/Application/Application.csproj \
-    && sed -i '/<\/Project>/i \  <ItemGroup>\n    <ProjectReference Include="..\\WebPortal\\WebPortal.csproj" />\n  </ItemGroup>' Projects/Application/Application.csproj
-
-# Build the complete application with WebPortal included
+# Publish the Application project directly for Linux x64.
+# We bypass publish.sh / BuildTool because:
+#   - publish.sh tries to download a native build-tool binary from GitHub releases
+#   - It falls back to `dotnet run --project BuildTool.csproj` which runs prerequisite
+#     checks, `dotnet tool restore`, and schema generation — all unnecessary in Docker
+#   - The BuildTool staleness check requires git history which is excluded by .dockerignore
 RUN dotnet publish Projects/Application/Application.csproj \
     -c Release \
     -r linux-x64 \
     --self-contained=false
 
+# Also publish the WebPortal project to include its DLL and dependencies
+RUN dotnet publish Projects/WebPortal/WebPortal.csproj \
+    -c Release \
+    -r linux-x64 \
+    --self-contained=false \
+    -o /webportal-publish
+
 # -- Stage 2: Runtime Environment --
+# Using aspnet image since we use ASP.NET Core (Kestrel) for the web portal
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 # Install runtime dependencies
@@ -45,13 +39,16 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy the published Distribution folder from build stage
-# WebPortal.dll is in Assemblies/ and wwwroot/ is copied by the csproj build targets
+# Copy the published Distribution folder from the build stage
 COPY --from=build /src/Distribution .
+
+# Copy WebPortal outputs (DLL and wwwroot)
+COPY --from=build /webportal-publish/WebPortal.dll ./Assemblies/WebPortal.dll
+COPY --from=build /src/Projects/WebPortal/wwwroot ./wwwroot
 
 # Expose both the game server port and the web portal port
 EXPOSE 2593
 EXPOSE 8080
 
-# The main executable — AssemblyHandler auto-discovers WebPortal.dll in Assemblies/
+# The main executable
 ENTRYPOINT ["dotnet", "ModernUO.dll"]

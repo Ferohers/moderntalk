@@ -1,6 +1,12 @@
 # How to Run ModernUO with Web Portal
 
-## Quick Start
+Step-by-step guide to get the ModernUO server with the Web Portal up and running.
+
+---
+
+## Option A: Docker (Recommended)
+
+This is the easiest way to run the project. Everything is containerized.
 
 ### Prerequisites
 
@@ -22,10 +28,10 @@ docker compose build
 
 This will:
 1. Pull the .NET 10 SDK image
-2. Clone upstream ModernUO from GitHub
-3. Inject the WebPortal project into the source tree
-4. Build everything together
-5. Package into a runtime image with ASP.NET Core
+2. Install native dependencies (libargon2, libicu, etc.)
+3. Clone the source code from your GitHub repo
+4. Build ModernUO with the Web Portal included
+5. Package everything into a runtime image with ASP.NET Core
 
 > ⏱️ First build takes 5-10 minutes. Subsequent builds are faster due to Docker caching.
 
@@ -38,18 +44,27 @@ docker compose up -d
 ### Step 4: Verify It's Running
 
 ```bash
+# Check the container is running
 docker compose ps
+
+# Check the logs
 docker compose logs -f
 ```
 
-You should see:
+You should see output like:
 ```
 Web Portal starting on port 8080
 ```
 
 ### Step 5: Access the Web Portal
 
-Open your browser: `http://localhost:8080`
+Open your browser and go to:
+
+```
+http://localhost:8080
+```
+
+You should see the ModernUO welcome page with the "How to Connect" guide.
 
 ### Step 6: Create an Account
 
@@ -76,6 +91,112 @@ docker compose down
 
 ---
 
+## Option B: Inject into an Existing ModernUO Installation (Linux)
+
+If you already have a working ModernUO installation on Linux and want to add the Web Portal to it.
+
+### Prerequisites
+
+- An existing ModernUO installation (built from source)
+- .NET 10 SDK installed
+- The `webportal-inject.tar.gz` archive
+
+### Step 1: Create the Injection Archive
+
+On your development machine (where the Web Portal source code is):
+
+```bash
+./pack-webportal.sh webportal-inject.tar.gz
+```
+
+### Step 2: Transfer the Archive to the Server
+
+```bash
+scp webportal-inject.tar.gz user@your-server:/tmp/
+```
+
+### Step 3: Extract and Run the Installer
+
+On the target server:
+
+```bash
+cd /path/to/modernuo
+tar -xzf /tmp/webportal-inject.tar.gz
+chmod +x install-webportal.sh
+./install-webportal.sh /path/to/modernuo
+```
+
+The installer will:
+1. Copy the Web Portal project files
+2. Patch `Application.csproj` (add ASP.NET Core + WebPortal reference)
+3. Patch `assemblies.json` (add WebPortal.dll)
+4. Patch `ModernUO.slnx` (add WebPortal project)
+5. Optionally patch Dockerfile and compose.yml
+
+### Step 4: Rebuild ModernUO
+
+```bash
+cd /path/to/modernuo
+./publish.sh release linux x64
+```
+
+### Step 5: Run the Server
+
+```bash
+cd Distribution
+dotnet ModernUO.dll
+```
+
+The Web Portal will start automatically on port 8080.
+
+---
+
+## Option C: Build from Source (Development)
+
+For developers who want to work on the code.
+
+### Prerequisites
+
+- .NET 10 SDK installed (`dotnet --version` should show 10.x)
+- Git
+- Native dependencies:
+  - **Ubuntu/Debian:** `sudo apt install libicu-dev libdeflate-dev zstd libargon2-dev liburing-dev`
+  - **macOS:** `brew install argon2 libdeflate`
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/Ferohers/moderntalk.git
+cd moderntalk
+```
+
+### Step 2: Build
+
+```bash
+./publish.sh release linux x64
+```
+
+Or manually:
+
+```bash
+dotnet build Projects/Application/Application.csproj -c Release
+```
+
+### Step 3: Run
+
+```bash
+cd Distribution
+dotnet ModernUO.dll
+```
+
+### Step 4: Access the Web Portal
+
+```
+http://localhost:8080
+```
+
+---
+
 ## Configuration
 
 The Web Portal reads its settings from ModernUO's configuration system. Settings are stored in `modernuo.json` and are auto-created with defaults on first run.
@@ -95,29 +216,9 @@ The Web Portal reads its settings from ModernUO's configuration system. Settings
 | `webPortal.connectionPort` | `2593` | Port shown in "How to Connect" guide |
 | `server.name` | `ModernUO` | Server name displayed on the welcome page |
 
-### SMTP Settings (for Password Reset Emails)
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `webPortal.smtp.enabled` | `false` | Enable/disable email sending |
-| `webPortal.smtp.host` | `""` | SMTP server hostname |
-| `webPortal.smtp.port` | `587` | SMTP server port |
-| `webPortal.smtp.username` | `""` | SMTP authentication username |
-| `webPortal.smtp.password` | `""` | SMTP authentication password |
-| `webPortal.smtp.useSsl` | `true` | Use SSL/TLS for SMTP connection |
-| `webPortal.smtp.fromAddress` | `""` | Sender email address |
-| `webPortal.smtp.fromName` | `ModernUO` | Sender display name |
-| `webPortal.passwordResetBaseUrl` | `""` | Base URL for password reset links (e.g. `https://uo.example.com`) |
-
 ### Changing Settings
 
-Edit `./configuration/modernuo.json` on the host machine, then restart:
-
-```bash
-docker compose restart
-```
-
-### Example Configuration
+Edit `modernuo.json` in the Distribution folder (or the Configuration volume in Docker):
 
 ```json
 {
@@ -125,15 +226,26 @@ docker compose restart
   "webPortal.port": 8080,
   "webPortal.connectionHost": "uo.myserver.com",
   "webPortal.connectionPort": 2593,
-  "server.name": "My UO Server",
-  "webPortal.smtp.enabled": true,
-  "webPortal.smtp.host": "smtp.gmail.com",
-  "webPortal.smtp.port": 587,
-  "webPortal.smtp.username": "your-email@gmail.com",
-  "webPortal.smtp.password": "your-app-password",
-  "webPortal.smtp.fromAddress": "your-email@gmail.com",
-  "webPortal.passwordResetBaseUrl": "https://uo.myserver.com"
+  "server.name": "My UO Server"
 }
+```
+
+Then restart the server for changes to take effect.
+
+### Docker Configuration
+
+With Docker, you can map the configuration directory as a volume:
+
+```yaml
+# Already configured in compose.yml
+volumes:
+  - ./configuration:/app/Configuration
+```
+
+Edit `./configuration/modernuo.json` on the host machine, then restart:
+
+```bash
+docker compose restart
 ```
 
 ---
@@ -148,17 +260,17 @@ docker compose restart
 ### Changing the Web Portal Port
 
 1. Edit `modernuo.json`: set `"webPortal.port"` to your desired port
-2. Update `compose.yml`:
+2. If using Docker, also update `compose.yml`:
    ```yaml
    ports:
      - "2593:2593"
      - "9090:9090"    # Changed from 8080
    ```
-3. Update the `Dockerfile`:
+3. If using Docker, also update the `Dockerfile`:
    ```dockerfile
    EXPOSE 9090
    ```
-4. Rebuild and restart: `docker compose build && docker compose up -d`
+4. Restart the server
 
 ---
 
@@ -166,14 +278,20 @@ docker compose restart
 
 ### Web Portal doesn't start
 
-1. Check the server logs: `docker compose logs -f`
+1. Check the server logs for errors:
+   ```bash
+   docker compose logs -f
+   ```
 2. Verify `webPortal.enabled` is `true` in `modernuo.json`
-3. Verify the port isn't already in use: `lsof -i :8080`
+3. Verify the port isn't already in use:
+   ```bash
+   lsof -i :8080
+   ```
 
 ### Can't access the web portal from another machine
 
 1. Make sure the port is open in your firewall
-2. Ensure the port mapping includes `0.0.0.0`:
+2. If using Docker, ensure the port mapping includes `0.0.0.0`:
    ```yaml
    ports:
      - "0.0.0.0:8080:8080"
@@ -196,7 +314,10 @@ docker compose restart
     "webPortal.jwtSecret": "your-base64-encoded-secret-here"
   }
   ```
-- Generate a secure key: `openssl rand -base64 32`
+- Generate a secure key:
+  ```bash
+  openssl rand -base64 32
+  ```
 
 ---
 
