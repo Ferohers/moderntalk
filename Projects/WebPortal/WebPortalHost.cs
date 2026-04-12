@@ -71,7 +71,7 @@ public static class WebPortalHost
 
                     // Trust all proxies — Cloudflare IPs change frequently and the server
                     // is not directly exposed to the internet, so spoofing is not a concern.
-                    options.KnownIPNetworks.Clear();
+                    options.KnownNetworks.Clear();
                     options.KnownProxies.Clear();
                 });
             }
