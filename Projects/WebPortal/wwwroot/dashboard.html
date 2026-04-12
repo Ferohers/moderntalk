@@ -177,7 +177,8 @@
                 document.getElementById('account-created').textContent = formatDate(info.created);
                 document.getElementById('account-lastlogin').textContent = formatDate(info.lastLogin);
                 document.getElementById('account-chars').textContent = `${info.characterCount} / ${info.maxCharacters}`;
-                document.getElementById('account-access').textContent = info.accessLevel;
+                const accessLevelMap = { 'Player': 'Oyuncu', 'Owner': 'Sahip', 'Administrator': 'Yönetici', 'GameMaster': 'Game Master', 'Counselor': 'Danışman', 'Seer': 'Kâhin' };
+                document.getElementById('account-access').textContent = accessLevelMap[info.accessLevel] || info.accessLevel;
                 document.getElementById('account-email').textContent = info.email || 'Girilmemiş';
 
                 const statusEl = document.getElementById('account-status');
