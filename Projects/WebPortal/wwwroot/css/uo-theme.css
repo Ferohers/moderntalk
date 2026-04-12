@@ -354,13 +354,6 @@ body {
     text-transform: uppercase;
 }
 
-/* Animatable custom property for the rotating border effect */
-@property --border-angle {
-    syntax: '<angle>';
-    initial-value: 0deg;
-    inherits: false;
-}
-
 /* === Server Status Badge === */
 .status-badge {
     display: inline-flex;
@@ -371,50 +364,20 @@ body {
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    border: 2px solid;
+    border: 1px solid;
     text-decoration: none;
-    position: relative;
 }
 
-/* --- Checking State --- */
-.status-checking {
+.status-online {
     color: var(--gold-light);
     border-color: var(--gold-light);
     background: rgba(200, 168, 72, 0.1);
-    animation: pulse-border 1.5s ease-in-out infinite;
 }
 
-.status-checking .status-dot {
-    background: var(--gold-light);
-    animation: pulse 1s infinite;
-}
-
-/* --- Online State --- */
-.status-online {
-    color: var(--gold-light);
-    border: 2px solid transparent;
-    background:
-        linear-gradient(rgba(200, 168, 72, 0.1), rgba(200, 168, 72, 0.1)) padding-box,
-        conic-gradient(from var(--border-angle), var(--gold-light), var(--gold-dim) 8%, var(--gold-dim) 92%, var(--gold-light)) border-box;
-    animation: rotate-border 3s linear infinite;
-}
-
-.status-online .status-dot {
-    background: var(--text-success);
-    animation: blink-green 1.5s ease-in-out infinite;
-    box-shadow: 0 0 6px rgba(72, 168, 72, 0.6);
-}
-
-/* --- Offline State --- */
 .status-offline {
     color: var(--text-error);
     border-color: var(--text-error);
     background: rgba(212, 72, 72, 0.1);
-}
-
-.status-offline .status-dot {
-    background: var(--text-error);
-    animation: none;
 }
 
 .status-dot {
@@ -422,27 +385,7 @@ body {
     height: 8px;
     border-radius: 50%;
     background: currentColor;
-    flex-shrink: 0;
-}
-
-@keyframes rotate-border {
-    to { --border-angle: 360deg; }
-}
-
-@keyframes blink-green {
-    0%, 100% {
-        opacity: 1;
-        box-shadow: 0 0 6px rgba(72, 168, 72, 0.6);
-    }
-    50% {
-        opacity: 0.3;
-        box-shadow: 0 0 2px rgba(72, 168, 72, 0.2);
-    }
-}
-
-@keyframes pulse-border {
-    0%, 100% { border-color: var(--gold-light); }
-    50% { border-color: var(--gold-dim); }
+    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {

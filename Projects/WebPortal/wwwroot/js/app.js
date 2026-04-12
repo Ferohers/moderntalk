@@ -198,8 +198,6 @@ const Api = {
 /**
  * Auto-initialize server status badge on every page that has one.
  * Any page including <div id="server-status"> will be updated automatically.
- * Three states: status-checking (initial), status-online, status-offline.
- * Periodically re-checks every 60 seconds.
  */
 document.addEventListener('DOMContentLoaded', async () => {
     const statusEl = document.getElementById('server-status');
@@ -208,34 +206,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Only run on pages that have the server status badge
     if (!statusEl || !statusText) return;
 
-    async function checkServerStatus() {
-        // Transition to checking state
-        statusEl.className = 'status-badge status-checking';
-        statusText.textContent = 'Sunucu kontrol ...';
-
-        try {
-            const info = await Api.getServerInfo();
-            if (info && !info.error) {
-                if (info.online) {
-                    statusEl.className = 'status-badge status-online';
-                    statusText.textContent = 'Sunucu Aktif';
-                } else {
-                    statusEl.className = 'status-badge status-offline';
-                    statusText.textContent = 'Sunucu Çökmüş';
-                }
+    try {
+        const info = await Api.getServerInfo();
+        if (info && !info.error) {
+            if (info.online) {
+                statusEl.className = 'status-badge status-online';
+                statusText.textContent = 'Sunucu Aktif';
             } else {
                 statusEl.className = 'status-badge status-offline';
                 statusText.textContent = 'Sunucu Çökmüş';
             }
-        } catch (e) {
+        } else {
             statusEl.className = 'status-badge status-offline';
-            statusText.textContent = 'Sunucuya erişilemedi';
+            statusText.textContent = 'Sunucu Çökmüş';
         }
+    } catch (e) {
+        statusEl.className = 'status-badge status-offline';
+        statusText.textContent = 'Sunucuya erişilemedi';
     }
-
-    // Initial check
-    await checkServerStatus();
-
-    // Periodic re-check every 60 seconds
-    setInterval(checkServerStatus, 60000);
 });
