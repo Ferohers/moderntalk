@@ -395,14 +395,13 @@ body {
     border: 2px solid transparent;
     background:
         linear-gradient(rgba(200, 168, 72, 0.1), rgba(200, 168, 72, 0.1)) padding-box,
-        conic-gradient(from var(--border-angle), var(--gold-light), var(--gold-dim) 8%, var(--gold-dim) 92%, var(--gold-light)) border-box;
+        conic-gradient(from var(--border-angle), var(--gold-light) 0%, var(--gold-primary) 4%, var(--gold-primary) 100%) border-box;
     animation: rotate-border 3s linear infinite;
 }
 
 .status-online .status-dot {
     background: var(--text-success);
     animation: blink-green 1.5s ease-in-out infinite;
-    box-shadow: 0 0 6px rgba(72, 168, 72, 0.6);
 }
 
 /* --- Offline State --- */
@@ -430,14 +429,8 @@ body {
 }
 
 @keyframes blink-green {
-    0%, 100% {
-        opacity: 1;
-        box-shadow: 0 0 6px rgba(72, 168, 72, 0.6);
-    }
-    50% {
-        opacity: 0.3;
-        box-shadow: 0 0 2px rgba(72, 168, 72, 0.2);
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
 }
 
 @keyframes pulse-border {
