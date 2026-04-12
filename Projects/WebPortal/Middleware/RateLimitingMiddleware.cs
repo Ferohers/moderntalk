@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -97,57 +96,9 @@ public class RateLimitingMiddleware
 
     private static string GetClientIp(HttpContext context)
     {
-        // When ForwardedHeaders middleware is active (BehindReverseProxy=true),
-        // RemoteIpAddress already contains the real client IP. Check it first.
-        var remoteIp = context.Connection.RemoteIpAddress?.ToString();
-        if (remoteIp != null && !IsPrivateOrLoopbackIp(remoteIp))
-        {
-            return remoteIp;
-        }
-
-        // Fallback: check X-Forwarded-For header manually
-        var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(forwardedFor))
-        {
-            // X-Forwarded-For: client, proxy1, proxy2 — first entry is the real client
-            var firstIp = forwardedFor.Split(',')[0].Trim();
-            if (!string.IsNullOrWhiteSpace(firstIp))
-            {
-                return firstIp;
-            }
-        }
-
-        // Fallback: check X-Real-IP header (used by some proxies)
-        var realIp = context.Request.Headers["X-Real-IP"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(realIp))
-        {
-            return realIp.Trim();
-        }
-
-        return remoteIp ?? "unknown";
-    }
-
-    private static bool IsPrivateOrLoopbackIp(string ip)
-    {
-        if (ip == "127.0.0.1" || ip == "::1")
-            return true;
-
-        if (ip.StartsWith("10.") || ip.StartsWith("192.168."))
-            return true;
-
-        // 172.16.0.0/12 — 172.16.x.x through 172.31.x.x
-        if (ip.StartsWith("172."))
-        {
-            var parts = ip.Split('.');
-            if (parts.Length >= 2 && int.TryParse(parts[1], out var secondOctet) && secondOctet >= 16 && secondOctet <= 31)
-                return true;
-        }
-
-        // IPv6 unique local addresses (fc00::/7)
-        if (ip.StartsWith("fc") || ip.StartsWith("fd"))
-            return true;
-
-        return false;
+        // Trust X-Forwarded-For only from known proxies
+        var forwardedFor = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return forwardedFor;
     }
 
     private class RateLimitEntry

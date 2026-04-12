@@ -33,7 +33,6 @@ public static class ServerEndpoints
                 return count;
             });
 
-            // ConnectionHost/Port are for the UO game client connection, NOT the web portal URL.
             // Use auto-detected public IP, fall back to configured connection host
             var connectionHost = ServerList.PublicAddress?.ToString() ?? WebPortalConfiguration.ConnectionHost;
 
