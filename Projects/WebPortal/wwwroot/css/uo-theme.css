@@ -626,7 +626,10 @@ body {
 
     .header-content {
         flex-direction: column;
+        justify-content: center;
+        align-items: center;
         gap: 0.5rem;
+        padding: 0;
     }
 
     .main-content {
@@ -635,7 +638,21 @@ body {
 
     .connection-address {
         font-size: 1rem;
-        padding: 0.5rem 1rem;
+        padding: 0.8rem 1rem;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .uo-frame-bg-main .connection-address .addr-label {
+        position: static;
+        transform: none;
+    }
+
+    .uo-frame-bg-main .connection-address .addr-port {
+        position: static;
+        transform: none;
     }
 }
 
