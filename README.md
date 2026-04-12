@@ -4,11 +4,11 @@ A web portal overlay for [ModernUO](https://github.com/modernuo/ModernUO) that a
 
 ## What This Repo Contains
 
-This is **not** a fork of ModernUO. It's an overlay that contains only the WebPortal project. The Dockerfile clones upstream ModernUO at build time and injects the WebPortal into it.
+This is **not** a fork of ModernUO. It's an overlay that contains only the WebPortal project. The Dockerfile clones both upstream ModernUO and this repo at build time, injects the WebPortal into it, and builds everything inside the container.
 
 ```
 moderntalk/
-├── Dockerfile              # Clones ModernUO, injects WebPortal, builds
+├── Dockerfile              # Clones both repos, injects WebPortal, builds
 ├── compose.yml             # Docker Compose with ports 2593 + 8080
 ├── Projects/WebPortal/     # The WebPortal project (our code)
 └── configuration/          # Sample configuration files
@@ -25,6 +25,8 @@ docker compose up -d
 
 - **Game server**: `localhost:2593` (UO client)
 - **Web portal**: `http://localhost:8080` (browser)
+
+> 💡 The Dockerfile clones both [ModernUO](https://github.com/modernuo/ModernUO) and [moderntalk](https://github.com/Ferohers/moderntalk) from GitHub inside the container. Your local directory stays clean — no build artifacts on the host.
 
 ## Features
 
@@ -60,7 +62,14 @@ Key settings:
 
 ## How It Works
 
-ModernUO uses an assembly discovery system (`AssemblyHandler`) that auto-loads DLLs from the `Assemblies/` directory and calls their `Configure()` and `Initialize()` methods. The WebPortal DLL is placed there during the Docker build, and Kestrel starts automatically on port 8080.
+The Dockerfile clones both repos inside the container:
+1. `git clone https://github.com/modernuo/ModernUO.git` — upstream server
+2. `git clone https://github.com/Ferohers/moderntalk.git` — our WebPortal overlay
+3. Copies `Projects/WebPortal/` from moderntalk into the ModernUO source tree
+4. Patches `Application.csproj` to add ASP.NET Core + WebPortal references
+5. Builds everything together with `dotnet publish`
+
+At runtime, ModernUO's `AssemblyHandler` auto-loads `WebPortal.dll` from `Assemblies/` and calls its `Configure()` and `Initialize()` methods, starting Kestrel on port 8080.
 
 ## License
 

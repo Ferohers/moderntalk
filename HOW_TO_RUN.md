@@ -23,11 +23,13 @@ docker compose build
 This will:
 1. Pull the .NET 10 SDK image
 2. Clone upstream ModernUO from GitHub
-3. Inject the WebPortal project into the source tree
-4. Build everything together
-5. Package into a runtime image with ASP.NET Core
+3. Clone moderntalk from GitHub
+4. Inject the WebPortal project into the ModernUO source tree
+5. Build everything together
+6. Package into a runtime image with ASP.NET Core
 
 > ⏱️ First build takes 5-10 minutes. Subsequent builds are faster due to Docker caching.
+> 💡 Both repos are cloned inside the container. Your local directory stays clean.
 
 ### Step 3: Start the Server
 

@@ -16,8 +16,11 @@ WORKDIR /src
 # Clone upstream ModernUO — gets latest updates automatically on rebuild
 RUN git clone https://github.com/modernuo/ModernUO.git .
 
-# Copy our WebPortal project into the cloned source tree
-COPY Projects/WebPortal/ Projects/WebPortal/
+# Clone moderntalk (our WebPortal overlay) into a separate directory
+RUN git clone https://github.com/Ferohers/moderntalk.git /moderntalk
+
+# Copy our WebPortal project from moderntalk into the ModernUO source tree
+RUN cp -r /moderntalk/Projects/WebPortal Projects/WebPortal
 
 # Patch Application.csproj to include WebPortal:
 #   1. Add FrameworkReference for ASP.NET Core (needed for Kestrel runtime)
