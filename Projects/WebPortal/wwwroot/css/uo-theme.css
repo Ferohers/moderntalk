@@ -369,9 +369,9 @@ body {
 }
 
 .status-online {
-    color: var(--gold-light);
+    color: var(--text-success);
     border-color: var(--gold-light);
-    background: rgba(200, 168, 72, 0.1);
+    background: rgba(72, 168, 72, 0.1);
 }
 
 .status-offline {
