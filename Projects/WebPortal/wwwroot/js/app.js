@@ -194,3 +194,34 @@ const Api = {
         }
     }
 };
+
+/**
+ * Auto-initialize server status badge on every page that has one.
+ * Any page including <div id="server-status"> will be updated automatically.
+ */
+document.addEventListener('DOMContentLoaded', async () => {
+    const statusEl = document.getElementById('server-status');
+    const statusText = document.getElementById('status-text');
+
+    // Only run on pages that have the server status badge
+    if (!statusEl || !statusText) return;
+
+    try {
+        const info = await Api.getServerInfo();
+        if (info && !info.error) {
+            if (info.online) {
+                statusEl.className = 'status-badge status-online';
+                statusText.textContent = 'Sunucu Aktif';
+            } else {
+                statusEl.className = 'status-badge status-offline';
+                statusText.textContent = 'Sunucu Çökmüş';
+            }
+        } else {
+            statusEl.className = 'status-badge status-offline';
+            statusText.textContent = 'Sunucu Çökmüş';
+        }
+    } catch (e) {
+        statusEl.className = 'status-badge status-offline';
+        statusText.textContent = 'Sunucuya erişilemedi';
+    }
+});

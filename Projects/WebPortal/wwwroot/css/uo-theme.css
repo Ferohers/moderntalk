@@ -288,7 +288,6 @@ body {
 /* === Hero Section === */
 .hero {
     text-align: center;
-#    padding: 3rem 2rem;
     margin-bottom: 2rem;
 }
 
@@ -639,3 +638,4 @@ body {
 .uo-tooltip:hover::after {
     opacity: 1;
 }
+

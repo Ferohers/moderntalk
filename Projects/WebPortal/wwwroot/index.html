@@ -35,7 +35,7 @@
                 <div class="uo-frame-inner">
                     <div class="connection-box">
                         <p style="margin-bottom: 0.8rem; color: var(--text-dim);">Sunucu Adresi</p>
-                        <div class="connection-address" id="connection-address">Yükleniyor...</div>
+                        <div class="connection-address">uo.iz.ci</div>
                         <p style="margin-top: 0.8rem; font-size: 0.85rem; color: var(--text-dim);">
                             Port: <span id="connection-port">2593</span>
                         </p>
@@ -159,30 +159,17 @@
                 // Not logged in — keep default nav (Login / Sign Up)
             }
 
-            // Load server info
+            // Load server info (status badge is auto-updated by app.js)
             try {
                 const info = await Api.getServerInfo();
                 if (info && !info.error) {
-                    document.getElementById('connection-address').textContent = info.connectionHost;
                     document.getElementById('connection-port').textContent = info.connectionPort;
                     document.getElementById('player-count').textContent = info.playerCount;
                     document.getElementById('expansion').textContent = info.expansion;
                     document.getElementById('client-version').textContent = info.clientVersion;
-
-                    const statusEl = document.getElementById('server-status');
-                    const statusText = document.getElementById('status-text');
-                    if (info.online) {
-                        statusEl.className = 'status-badge status-online';
-                        statusText.textContent = 'Sunucu Aktif';
-                    } else {
-                        statusEl.className = 'status-badge status-offline';
-                        statusText.textContent = 'Sunucu Çökmüş';
-                    }
                 }
             } catch (e) {
-                const statusEl = document.getElementById('server-status');
-                statusEl.className = 'status-badge status-offline';
-                document.getElementById('status-text').textContent = 'Unable to reach server';
+                // Server info unavailable — status badge handled by app.js
             }
         });
     </script>
