@@ -1,8 +1,6 @@
 # How to Run ModernUO with Web Portal
 
-## Quick Start (Pre-built Image)
-
-The easiest way — pull the pre-built image from GitHub Container Registry.
+## Quick Start
 
 ### Prerequisites
 
@@ -16,15 +14,30 @@ git clone https://github.com/Ferohers/moderntalk.git
 cd moderntalk
 ```
 
-### Step 2: Start the Server
+### Step 2: Build the Docker Image
+
+```bash
+docker compose build
+```
+
+This will:
+1. Pull the .NET 10 SDK image
+2. Clone upstream ModernUO from GitHub
+3. Clone moderntalk from GitHub
+4. Inject the WebPortal project into the ModernUO source tree
+5. Build everything together
+6. Package into a runtime image with ASP.NET Core
+
+> ⏱️ First build takes 5-10 minutes. Subsequent builds are faster due to Docker caching.
+> 💡 Both repos are cloned inside the container. Your local directory stays clean.
+
+### Step 3: Start the Server
 
 ```bash
 docker compose up -d
 ```
 
-This pulls the pre-built image from `ghcr.io/ferohers/moderntalk:latest` — no local build needed.
-
-### Step 3: Verify It's Running
+### Step 4: Verify It's Running
 
 ```bash
 docker compose ps
@@ -36,18 +49,18 @@ You should see:
 Web Portal starting on port 8080
 ```
 
-### Step 4: Access the Web Portal
+### Step 5: Access the Web Portal
 
 Open your browser: `http://localhost:8080`
 
-### Step 5: Create an Account
+### Step 6: Create an Account
 
 1. Click **"Sign Up"** on the welcome page
 2. Fill in a username (3-30 characters) and password (8+ characters)
 3. Click **"Create Account"**
 4. You'll be redirected to the account dashboard
 
-### Step 6: Connect with a UO Client
+### Step 7: Connect with a UO Client
 
 1. Install a compatible Ultima Online client (version 7.0.96.0 or later)
 2. Configure the client to connect to:
@@ -55,35 +68,13 @@ Open your browser: `http://localhost:8080`
    - **Port:** `2593`
 3. Log in with the account you created on the web portal
 
-### Step 7: Stop the Server
+### Step 8: Stop the Server
 
 ```bash
 docker compose down
 ```
 
 > 💡 Your data is preserved in Docker volumes. Use `docker compose down -v` to delete all data.
-
----
-
-## Building Locally
-
-If you want to build the image yourself (e.g., to test changes before pushing):
-
-1. Edit `compose.yml` — comment out the `image` line and uncomment the `build` section:
-   ```yaml
-   # image: ghcr.io/ferohers/moderntalk:latest
-   build:
-     context: .
-     dockerfile: Dockerfile
-   ```
-
-2. Build and run:
-   ```bash
-   docker compose build
-   docker compose up -d
-   ```
-
-> ⏱️ First build takes 5-10 minutes. The Dockerfile clones both ModernUO and moderntalk from GitHub inside the container.
 
 ---
 
@@ -165,11 +156,11 @@ docker compose restart
      - "2593:2593"
      - "9090:9090"    # Changed from 8080
    ```
-3. If building locally, also update the `Dockerfile`:
+3. Update the `Dockerfile`:
    ```dockerfile
    EXPOSE 9090
    ```
-4. Restart: `docker compose up -d`
+4. Rebuild and restart: `docker compose build && docker compose up -d`
 
 ---
 
