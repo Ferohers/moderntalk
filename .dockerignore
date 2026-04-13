@@ -13,7 +13,14 @@
 !Projects/WebPortal/
 !Projects/WebPortal/**
 
-# Exclude build artifacts within WebPortal
+# Include custom Server modifications
+!Projects/Server/
+!Projects/Server/**
+
+# Exclude build artifacts within WebPortal and Server
 Projects/WebPortal/**/bin/
 Projects/WebPortal/**/obj/
 Projects/WebPortal/.DS_Store
+Projects/Server/**/bin/
+Projects/Server/**/obj/
+Projects/Server/.DS_Store
