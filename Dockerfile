@@ -15,10 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 
 WORKDIR /src
 
-# Clone upstream ModernUO (shallow clone for speed)
+# Clone upstream ModernUO (full clone needed by Nerdbank.GitVersioning)
 ARG MODERNUO_REPO=https://github.com/modernuo/ModernUO.git
 ARG MODERNUO_BRANCH=main
-RUN git clone --depth 1 --branch ${MODERNUO_BRANCH} ${MODERNUO_REPO} .
+RUN git clone --branch ${MODERNUO_BRANCH} ${MODERNUO_REPO} .
 
 # Copy WebPortal project from build context
 COPY Projects/WebPortal/ Projects/WebPortal/
