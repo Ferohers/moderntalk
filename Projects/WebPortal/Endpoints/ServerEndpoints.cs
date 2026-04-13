@@ -33,8 +33,8 @@ public static class ServerEndpoints
                 return count;
             });
 
-            // Use auto-detected public IP, fall back to configured connection host
-            var connectionHost = ServerList.PublicAddress?.ToString() ?? WebPortalConfiguration.ConnectionHost;
+            // Use configured public IP, fall back to configured connection host
+            var connectionHost = ServerList.Address ?? WebPortalConfiguration.ConnectionHost;
 
             return Results.Ok(new ServerInfoResponse
             {
