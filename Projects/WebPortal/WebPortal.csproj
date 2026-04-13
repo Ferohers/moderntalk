@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <RootNamespace>Server.WebPortal</RootNamespace>
+        <AssemblyName>WebPortal</AssemblyName>
+        <Product>ModernUO Web Portal</Product>
+        <OutDir>..\..\Distribution\Assemblies</OutDir>
+        <PublishDir>..\..\Distribution\Assemblies</PublishDir>
+        <Configurations>Debug;Release;Analyze</Configurations>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Logger\Logger.csproj" />
+        <ProjectReference Include="..\Server\Server.csproj" Private="false" PrivateAssets="All" IncludeAssets="None">
+            <IncludeInPackage>false</IncludeInPackage>
+        </ProjectReference>
+        <ProjectReference Include="..\UOContent\UOContent.csproj" Private="false" PrivateAssets="All" IncludeAssets="None">
+            <IncludeInPackage>false</IncludeInPackage>
+        </ProjectReference>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.11.0" />
+    </ItemGroup>
+    <Target Name="CopyWwwroot" AfterTargets="Build">
+        <Message Text="WebPortal: Copying wwwroot to Distribution..." />
+        <ItemGroup>
+            <WwwrootFiles Include="wwwroot\**\*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(WwwrootFiles)" DestinationFolder="..\..\Distribution\wwwroot\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    </Target>
+    <Target Name="CleanWwwroot" AfterTargets="Clean">
+        <Message Text="WebPortal: Removing wwwroot from Distribution..." />
+        <RemoveDir Directories="..\..\Distribution\wwwroot" ContinueOnError="true" />
+    </Target>
+</Project>

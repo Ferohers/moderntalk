@@ -1,0 +1,18 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Runtime data (mounted as Docker volumes)
+/configuration/
+/shard/

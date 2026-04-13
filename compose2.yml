@@ -1,0 +1,36 @@
+# =============================================================================
+# compose2.yml — Fallback deployment using local Dockerfile build
+#
+# Use this if the GitHub Container Registry image is unavailable.
+#
+# Usage:
+#   docker compose -f compose2.yml build
+#   docker compose -f compose2.yml up -d
+#
+# The Dockerfile clones upstream ModernUO and injects the WebPortal project.
+# First build takes 5-10 minutes. Subsequent builds are faster (Docker cache).
+# =============================================================================
+
+services:
+  modernuo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: modernuo_server
+    restart: unless-stopped
+    ports:
+      - "2593:2593"    # Game server (UO client protocol)
+      - "8080:8080"    # Web portal (HTTP)
+    volumes:
+      - /home/altan/modernuo/gamefiles:/gamefiles
+      - ./configuration:/app/Configuration
+      - ./shard:/app/Saves
+    environment:
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+    cap_add:
+      - SYS_NICE
+      - IPC_LOCK
+    security_opt:
+      - seccomp:unconfined
+    stdin_open: true
+    tty: true
