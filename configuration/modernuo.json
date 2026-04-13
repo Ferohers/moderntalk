@@ -1,0 +1,26 @@
+{
+  "assemblyDirectories": [
+    "./Assemblies"
+  ],
+  "settings": {
+    "webPortal.enabled": "True",
+    "webPortal.port": "8080",
+    "webPortal.connectionHost": "localhost",
+    "webPortal.connectionPort": "2593",
+    "webPortal.maxLoginAttemptsPerMinute": "5",
+    "webPortal.accountLockoutMinutes": "15",
+    "webPortal.accessTokenExpiryMinutes": "15",
+    "webPortal.refreshTokenExpiryDays": "7",
+    "webPortal.jwtSecret": "",
+    "webPortal.smtp.enabled": "False",
+    "webPortal.smtp.host": "",
+    "webPortal.smtp.port": "587",
+    "webPortal.smtp.username": "",
+    "webPortal.smtp.password": "",
+    "webPortal.smtp.useSsl": "True",
+    "webPortal.smtp.fromAddress": "",
+    "webPortal.smtp.fromName": "Ultima Online",
+    "webPortal.passwordResetBaseUrl": "",
+    "server.name": "ModernUO"
+  }
+}
