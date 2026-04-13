@@ -6,11 +6,7 @@ WORKDIR /src
 # Copy the entire project into the container (respects .dockerignore)
 COPY . .
 
-# Single publish of Application.csproj builds ALL projects transitively:
-#   Server → Logger
-#   Application → Server + UOContent + WebPortal
-# WebPortal's NuGet deps (JWT packages) flow through because it's a normal
-# ProjectReference in Application.csproj (not Private=false).
+# Publish the Application project directly for Linux x64.
 # We bypass publish.sh / BuildTool because:
 #   - publish.sh tries to download a native build-tool binary from GitHub releases
 #   - It falls back to `dotnet run --project BuildTool.csproj` which runs prerequisite
@@ -19,15 +15,14 @@ COPY . .
 RUN dotnet publish Projects/Application/Application.csproj \
     -c Release \
     -r linux-x64 \
+    --self-contained=false
+
+# Also publish the WebPortal project to include its DLL and dependencies
+RUN dotnet publish Projects/WebPortal/WebPortal.csproj \
+    -c Release \
+    -r linux-x64 \
     --self-contained=false \
-    -o /publish
-
-# Copy game data files (these are source files in Distribution/Data, not build output)
-RUN cp -r Distribution/Data /publish/Data
-
-# Copy wwwroot static files for the Web Portal
-# (the CopyWwwroot MSBuild target may not fire correctly with -r linux-x64)
-RUN cp -r Projects/WebPortal/wwwroot /publish/wwwroot
+    -o /webportal-publish
 
 # -- Stage 2: Runtime Environment --
 # Using aspnet image since we use ASP.NET Core (Kestrel) for the web portal
@@ -44,8 +39,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy the published output from the build stage
-COPY --from=build /publish .
+# Copy the published Distribution folder from the build stage
+COPY --from=build /src/Distribution .
+
+# Copy WebPortal outputs (DLL and wwwroot)
+COPY --from=build /webportal-publish/WebPortal.dll ./Assemblies/WebPortal.dll
+COPY --from=build /src/Projects/WebPortal/wwwroot ./wwwroot
 
 # Expose both the game server port and the web portal port
 EXPOSE 2593
