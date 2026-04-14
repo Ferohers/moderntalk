@@ -1,11 +1,10 @@
 # =============================================================================
-# ModernUO + WebPortal + HTTP API — Standalone Docker Build
+# ModernUO + WebPortal — Standalone Docker Build
 #
 # This Dockerfile clones upstream ModernUO, injects the WebPortal project,
-# adds the HTTP API module for UO Commander admin app,
 # patches the build configuration, and produces a lean runtime image.
 #
-# Build context needs: Projects/WebPortal/ and Projects/Server/HTTP/
+# Build context only needs: Projects/WebPortal/
 # =============================================================================
 
 # -- Stage 1: Clone upstream ModernUO and inject WebPortal --
@@ -23,10 +22,6 @@ RUN git clone --branch ${MODERNUO_BRANCH} ${MODERNUO_REPO} .
 
 # Copy WebPortal project from build context
 COPY Projects/WebPortal/ Projects/WebPortal/
-
-# Copy HTTP API module files (for UO Commander admin app)
-# These are compiled into Server.dll as part of the ModernUO build
-COPY Projects/Server/HTTP/ Projects/Server/HTTP/
 
 # --- Patch build configuration to include WebPortal ---
 
@@ -55,9 +50,7 @@ RUN echo "=== Verifying patches ===" && \
     grep -q "WebPortal.dll" Distribution/Data/assemblies.json && \
     echo "  ✓ assemblies.json patched" && \
     grep -q "WebPortal.csproj" ModernUO.slnx && \
-    echo "  ✓ ModernUO.slnx patched" && \
-    test -f Projects/Server/HTTP/HttpApiServer.cs && \
-    echo "  ✓ HTTP API module files copied"
+    echo "  ✓ ModernUO.slnx patched"
 
 # -- Stage 2: Build --
 FROM source AS build
@@ -98,16 +91,9 @@ COPY --from=build /webportal-publish/WebPortal.dll ./Assemblies/WebPortal.dll
 # Copy WebPortal frontend files
 COPY --from=build /src/Projects/WebPortal/wwwroot ./wwwroot
 
-# Copy HTTP API module assemblies (compiled into Server.dll, no separate copy needed)
-# Note: HttpApiServer.cs is compiled as part of Server.dll
-
-# Expose game server, web portal, and HTTP API ports
-# 2593: Game server port
-# 8080: WebPortal
-# 8081: HTTP API (UO Commander)
+# Expose game server and web portal ports
 EXPOSE 2593
 EXPOSE 8080
-EXPOSE 8081
 
 # ModernUO entry point
 ENTRYPOINT ["dotnet", "ModernUO.dll"]
