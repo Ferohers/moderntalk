@@ -7,14 +7,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Server.Accounting;
-using Server.Items;
-using Server.Mobiles;
+using Server.Commands;
+using Server.Misc;
 using Server.Network;
 
 namespace Server.HTTP;
@@ -121,7 +120,7 @@ public static class HttpApiServer
             
             // Skip authentication for login endpoint
             var path = request.Url?.AbsolutePath ?? "/";
-            if (path.Contains("/api/auth/login"))
+            if (path.StartsWith("/api/auth/") && path.Contains("/login"))
             {
                 await HandleAuthLogin(request, response);
                 return;
@@ -232,28 +231,28 @@ public static class HttpApiServer
                 await HandleUnbanAccount(request, response, username, ExtractAccountName(p));
                 break;
             
-            // Firewall - Disabled (Firewall type not available in ModernUO)
-            // case "/api/firewall":
-            //     if (request.HttpMethod == "GET")
-            //         await HandleGetFirewallRules(request, response);
-            //     else if (request.HttpMethod == "POST")
-            //         await HandleAddFirewallRule(request, response, username);
-            //     else if (request.HttpMethod == "DELETE")
-            //         await HandleRemoveFirewallRule(request, response, username);
-            //     break;
+            // Firewall
+            case "/api/firewall":
+                if (request.HttpMethod == "GET")
+                    await HandleGetFirewallRules(request, response);
+                else if (request.HttpMethod == "POST")
+                    await HandleAddFirewallRule(request, response, username);
+                else if (request.HttpMethod == "DELETE")
+                    await HandleRemoveFirewallRule(request, response, username);
+                break;
             
             // Logs
             case "/api/logs":
                 await HandleGetLogs(request, response);
                 break;
             
-            // Server Lockdown - Disabled (AccountHandler.LockdownLevel not available)
-            // case "/api/server/lockdown":
-            //     if (request.HttpMethod == "POST")
-            //         await HandleSetLockdown(request, response, username);
-            //     else if (request.HttpMethod == "DELETE")
-            //         await HandleDisableLockdown(request, response, username);
-            //     break;
+            // Server Lockdown
+            case "/api/server/lockdown":
+                if (request.HttpMethod == "POST")
+                    await HandleSetLockdown(request, response, username);
+                else if (request.HttpMethod == "DELETE")
+                    await HandleDisableLockdown(request, response, username);
+                break;
             
             default:
                 await SendJsonResponse(response, 404, new { error = "Endpoint not found" });
@@ -324,16 +323,16 @@ public static class HttpApiServer
     {
         var status = new
         {
-            isRunning = true,
-            uptime = (DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalSeconds,
+            isRunning = Core.Running,
+            uptime = (DateTime.UtcNow - Core.CreationTime).TotalSeconds,
             playerCount = NetState.Instances.Count(ns => ns.Mobile != null),
-            maxPlayers = 100, // Default value, configure as needed
+            maxPlayers = NetState.MaxConnections,
             memoryUsage = GC.GetGCMemoryInfo().HeapSizeBytes,
             cpuUsage = 0.0, // Would need performance counters
-            worldSaveStatus = "Unknown",
-            lastSaveTime = DateTime.MinValue,
-            version = typeof(HttpApiServer).Assembly.GetName().Version?.ToString() ?? "1.0.0",
-            lockdownLevel = "None" // AccountHandler.LockdownLevel not available
+            worldSaveStatus = World.SaveThread?.ThreadState.ToString() ?? "Idle",
+            lastSaveTime = World.LastSave,
+            version = GitInfo.Version,
+            lockdownLevel = AccountHandler.LockdownLevel?.ToString() ?? "None"
         };
         
         await SendJsonResponse(response, 200, status);
@@ -400,8 +399,7 @@ public static class HttpApiServer
             // Broadcast restart message
             World.Broadcast(0x35, true, $"Server will restart in {delay} seconds. Please find a safe location.");
             
-            // Create a one-shot timer for restart
-            Action restartAction = () =>
+            Timer.StartTimer(TimeSpan.FromSeconds(delay), () =>
             {
                 if (save)
                 {
@@ -410,9 +408,7 @@ public static class HttpApiServer
                 World.Broadcast(0x26, true, "Server restarting now...");
                 NetState.Shutdown();
                 Core.Kill(true);
-            };
-            var restartTimer = new ActionTimer(TimeSpan.FromSeconds(delay), restartAction);
-            restartTimer.Start();
+            });
         });
         
         await SendJsonResponse(response, 200, new { message = $"Restart scheduled in {delay} seconds" });
@@ -803,7 +799,7 @@ public static class HttpApiServer
     
     #endregion
     
-    /* #region Firewall - Disabled (Firewall type not available in ModernUO)
+    #region Firewall
     
     private static async Task HandleGetFirewallRules(HttpListenerRequest request, HttpListenerResponse response)
     {
@@ -861,7 +857,7 @@ public static class HttpApiServer
         await SendJsonResponse(response, 200, new { message = "Firewall rule removed" });
     }
     
-    #endregion */
+    #endregion
     
     #region Logs
     
@@ -879,7 +875,7 @@ public static class HttpApiServer
     
     #endregion
     
-    /* #region Server Lockdown - Disabled (AccountHandler.LockdownLevel not available)
+    #region Server Lockdown
     
     private static async Task HandleSetLockdown(HttpListenerRequest request, HttpListenerResponse response, string username)
     {
@@ -918,7 +914,7 @@ public static class HttpApiServer
         await SendJsonResponse(response, 200, new { message = "Lockdown disabled" });
     }
     
-    #endregion */
+    #endregion
     
     #region Helpers
     
@@ -952,7 +948,7 @@ public static class HttpApiServer
         return parts[3];
     }
     
-    private static List<ItemDto> SerializeContainer(Container container)
+    private static List<ItemDto> SerializeContainer(IContainer container)
     {
         var items = new List<ItemDto>();
         
@@ -998,28 +994,6 @@ public static class HttpApiServer
     
     #endregion
 }
-
-#region Helper Classes
-
-/// <summary>
-/// A timer that executes an Action callback when it ticks
-/// </summary>
-public class ActionTimer : Timer
-{
-    private readonly Action _callback;
-
-    public ActionTimer(TimeSpan delay, Action callback) : base(delay, 1)
-    {
-        _callback = callback;
-    }
-
-    protected override void OnTick()
-    {
-        _callback?.Invoke();
-    }
-}
-
-#endregion
 
 #region DTOs
 
