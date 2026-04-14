@@ -66,7 +66,7 @@ public class AccountService
                 BannedBy = null,
                 LastLogin = acct.LastLogin,
                 Created = acct.Created,
-                CharacterCount = acct.Length,
+                CharacterCount = characters.Count,
                 MaxCharacters = acct.Limit,
                 Email = acct.Email,
                 Characters = characters
@@ -182,6 +182,15 @@ public class AccountService
 
     private static AccountResponse MapToAccountResponse(Account acct)
     {
+        int actualCharCount = 0;
+        for (var i = 0; i < acct.Length; i++)
+        {
+            if (acct[i] != null)
+            {
+                actualCharCount++;
+            }
+        }
+
         return new AccountResponse
         {
             Username = acct.Username,
@@ -189,7 +198,7 @@ public class AccountService
             IsBanned = acct.Banned,
             LastLogin = acct.LastLogin,
             Created = acct.Created,
-            CharacterCount = acct.Length,
+            CharacterCount = actualCharCount,
             Email = acct.Email
         };
     }
