@@ -35,9 +35,10 @@ public static class CommanderApiConfiguration
             15
         );
         // Store CORS origins as comma-separated string since GetOrUpdateSetting<T> requires value types
+        // Default is empty — native apps (Swift, etc.) don't enforce CORS, and the fallback is AllowAnyOrigin()
         CorsOrigins = ServerConfiguration.GetOrUpdateSetting(
             "commanderApi.corsOrigins",
-            "http://localhost:8090"
+            ""
         );
 
         if (Enabled)

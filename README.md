@@ -100,7 +100,7 @@ volumes:
 | `commanderApi.jwtExpiryHours` | `24` | Token expiry time |
 | `commanderApi.maxLoginAttemptsPerMinute` | `10` | Rate limit for login attempts |
 | `commanderApi.accountLockoutMinutes` | `15` | Lockout duration after failed attempts |
-| `commanderApi.corsOrigins` | `["http://localhost:8090"]` | Allowed CORS origins |
+| `commanderApi.corsOrigins` | *(empty — AllowAnyOrigin)* | Comma-separated CORS origins. Empty = any origin (safe for native apps) |
 
 ### Persistent JWT Secrets
 
