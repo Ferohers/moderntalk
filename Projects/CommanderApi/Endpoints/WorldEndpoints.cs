@@ -44,7 +44,7 @@ public static class WorldEndpoints
             return Results.Ok(stats);
         });
 
-        group.MapGet("/items/{serial}", async (int serial) =>
+        group.MapGet("/items/{serial:uint}", async (uint serial) =>
         {
             var item = await GameThreadDispatcher.Enqueue(() =>
             {

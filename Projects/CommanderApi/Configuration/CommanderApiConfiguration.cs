@@ -15,7 +15,7 @@ public static class CommanderApiConfiguration
     public static int JwtExpiryHours { get; private set; }
     public static int MaxLoginAttemptsPerMinute { get; private set; }
     public static int AccountLockoutMinutes { get; private set; }
-    public static string[] CorsOrigins { get; private set; } = [];
+    public static string CorsOrigins { get; private set; } = "";
 
     public static void Configure()
     {
@@ -34,15 +34,29 @@ public static class CommanderApiConfiguration
             "commanderApi.accountLockoutMinutes",
             15
         );
+        // Store CORS origins as comma-separated string since GetOrUpdateSetting<T> requires value types
         CorsOrigins = ServerConfiguration.GetOrUpdateSetting(
             "commanderApi.corsOrigins",
-            new[] { "http://localhost:8090" }
+            "http://localhost:8090"
         );
 
         if (Enabled)
         {
             logger.Information("Commander API configured on port {Port}", Port);
         }
+    }
+
+    /// <summary>
+    ///     Returns CORS origins parsed from the comma-separated configuration string.
+    /// </summary>
+    public static string[] GetCorsOriginArray()
+    {
+        if (string.IsNullOrWhiteSpace(CorsOrigins))
+        {
+            return [];
+        }
+
+        return CorsOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
     private static string GenerateDefaultJwtSecret()

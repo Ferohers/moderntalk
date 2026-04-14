@@ -29,7 +29,7 @@ public static class PlayerEndpoints
             return Results.Ok(players);
         });
 
-        group.MapGet("/{serial}", async (int serial, PlayerService playerService) =>
+        group.MapGet("/{serial:uint}", async (uint serial, PlayerService playerService) =>
         {
             var player = await playerService.GetPlayerDetail(serial);
             if (player == null)
@@ -40,7 +40,7 @@ public static class PlayerEndpoints
             return Results.Ok(player);
         });
 
-        group.MapPost("/{serial}/kick", async (int serial, HttpContext context, PlayerService playerService, AuditLogService auditLog, KickRequest? request) =>
+        group.MapPost("/{serial:uint}/kick", async (uint serial, HttpContext context, PlayerService playerService, AuditLogService auditLog, KickRequest? request) =>
         {
             var actor = context.User.Identity?.Name ?? "unknown";
             var (success, error) = await playerService.KickPlayer(serial, actor, request?.Reason);
@@ -54,7 +54,7 @@ public static class PlayerEndpoints
             return Results.Ok(new SuccessResponse { Message = "Player kicked" });
         });
 
-        group.MapPost("/{serial}/ban", async (int serial, HttpContext context, PlayerService playerService, AuditLogService auditLog, BanRequest? request) =>
+        group.MapPost("/{serial:uint}/ban", async (uint serial, HttpContext context, PlayerService playerService, AuditLogService auditLog, BanRequest? request) =>
         {
             var actor = context.User.Identity?.Name ?? "unknown";
             var (success, error) = await playerService.BanPlayer(serial, actor, request?.Reason);
@@ -68,7 +68,7 @@ public static class PlayerEndpoints
             return Results.Ok(new SuccessResponse { Message = "Player banned" });
         });
 
-        group.MapPost("/{serial}/unban", async (int serial, HttpContext context, PlayerService playerService, AuditLogService auditLog) =>
+        group.MapPost("/{serial:uint}/unban", async (uint serial, HttpContext context, PlayerService playerService, AuditLogService auditLog) =>
         {
             var actor = context.User.Identity?.Name ?? "unknown";
             var (success, error) = await playerService.UnbanPlayer(serial, actor);
@@ -82,7 +82,7 @@ public static class PlayerEndpoints
             return Results.Ok(new SuccessResponse { Message = "Player unbanned" });
         });
 
-        group.MapGet("/{serial}/equipment", async (int serial, PlayerService playerService) =>
+        group.MapGet("/{serial:uint}/equipment", async (uint serial, PlayerService playerService) =>
         {
             var items = await playerService.GetEquipment(serial);
             if (items == null)
@@ -93,7 +93,7 @@ public static class PlayerEndpoints
             return Results.Ok(items);
         });
 
-        group.MapGet("/{serial}/backpack", async (int serial, PlayerService playerService) =>
+        group.MapGet("/{serial:uint}/backpack", async (uint serial, PlayerService playerService) =>
         {
             var items = await playerService.GetBackpack(serial);
             if (items == null)
@@ -104,7 +104,7 @@ public static class PlayerEndpoints
             return Results.Ok(items);
         });
 
-        group.MapGet("/{serial}/skills", async (int serial, PlayerService playerService) =>
+        group.MapGet("/{serial:uint}/skills", async (uint serial, PlayerService playerService) =>
         {
             var skills = await playerService.GetSkills(serial);
             if (skills == null)
@@ -115,7 +115,7 @@ public static class PlayerEndpoints
             return Results.Ok(skills);
         });
 
-        group.MapGet("/{serial}/properties", async (int serial, PlayerService playerService) =>
+        group.MapGet("/{serial:uint}/properties", async (uint serial, PlayerService playerService) =>
         {
             var properties = await playerService.GetProperties(serial);
             if (properties == null)

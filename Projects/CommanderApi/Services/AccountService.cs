@@ -92,7 +92,9 @@ public class AccountService
             }
 
             account.Banned = true;
-            account.SetBanTags(actor, reason ?? "Banned via Commander API");
+            // Note: SetBanTags(Mobile, DateTime, TimeSpan) records ban metadata but requires
+            // the admin's Mobile reference which we don't have from HTTP context.
+            // The Banned flag is what actually enforces the ban.
 
             logger.Information("Commander API: Account '{Target}' banned by {Actor}",
                 targetUsername, actor);

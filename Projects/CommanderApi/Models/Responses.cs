@@ -33,7 +33,7 @@ public class ServerStatusResponse
 // Player responses
 public class PlayerResponse
 {
-    public int Serial { get; set; }
+    public uint Serial { get; set; }
     public string Name { get; set; } = "";
     public string AccessLevel { get; set; } = "";
     public string Location { get; set; } = "";
@@ -46,7 +46,7 @@ public class PlayerResponse
 
 public class PlayerDetailResponse
 {
-    public int Serial { get; set; }
+    public uint Serial { get; set; }
     public string Name { get; set; } = "";
     public string AccessLevel { get; set; } = "";
     public int X { get; set; }
@@ -74,7 +74,7 @@ public class PlayerDetailResponse
 
 public class ItemResponse
 {
-    public int Serial { get; set; }
+    public uint Serial { get; set; }
     public string Name { get; set; } = "";
     public int ItemId { get; set; }
     public int Hue { get; set; }
@@ -95,7 +95,7 @@ public class SkillResponse
     public string Name { get; set; } = "";
     public double Value { get; set; }
     public double Base { get; set; }
-    public int Cap { get; set; }
+    public double Cap { get; set; }
     public string Lock { get; set; } = "";
 }
 
@@ -129,7 +129,7 @@ public class AccountDetailResponse
 public class CharacterSummaryResponse
 {
     public string Name { get; set; } = "";
-    public int Serial { get; set; }
+    public uint Serial { get; set; }
 }
 
 // World responses

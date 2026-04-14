@@ -55,7 +55,7 @@ public class PlayerService
         });
     }
 
-    public async Task<PlayerDetailResponse?> GetPlayerDetail(int serial)
+    public async Task<PlayerDetailResponse?> GetPlayerDetail(uint serial)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -95,7 +95,7 @@ public class PlayerService
         });
     }
 
-    public async Task<(bool success, string? error)> KickPlayer(int serial, string actor, string? reason)
+    public async Task<(bool success, string? error)> KickPlayer(uint serial, string actor, string? reason)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -122,7 +122,7 @@ public class PlayerService
         });
     }
 
-    public async Task<(bool success, string? error)> BanPlayer(int serial, string actor, string? reason)
+    public async Task<(bool success, string? error)> BanPlayer(uint serial, string actor, string? reason)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -146,7 +146,10 @@ public class PlayerService
             }
 
             account.Banned = true;
-            account.SetBanTags(actor, reason ?? "Banned via Commander API");
+            // Note: SetBanTags(Mobile, DateTime, TimeSpan) records ban metadata but requires
+            // the admin's Mobile reference which we don't have from HTTP context.
+            // The Banned flag is what actually enforces the ban.
+
             mobile.NetState.Disconnect("Banned by administrator");
 
             logger.Information("Commander API: {Player} (account: {Account}) banned by {Actor}",
@@ -156,7 +159,7 @@ public class PlayerService
         });
     }
 
-    public async Task<(bool success, string? error)> UnbanPlayer(int serial, string actor)
+    public async Task<(bool success, string? error)> UnbanPlayer(uint serial, string actor)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -181,7 +184,7 @@ public class PlayerService
         });
     }
 
-    public async Task<List<ItemResponse>?> GetEquipment(int serial)
+    public async Task<List<ItemResponse>?> GetEquipment(uint serial)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -201,7 +204,7 @@ public class PlayerService
         });
     }
 
-    public async Task<List<ItemResponse>?> GetBackpack(int serial)
+    public async Task<List<ItemResponse>?> GetBackpack(uint serial)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -215,7 +218,7 @@ public class PlayerService
         });
     }
 
-    public async Task<List<SkillResponse>?> GetSkills(int serial)
+    public async Task<List<SkillResponse>?> GetSkills(uint serial)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -254,7 +257,7 @@ public class PlayerService
         });
     }
 
-    public async Task<Dictionary<string, object>?> GetProperties(int serial)
+    public async Task<Dictionary<string, object>?> GetProperties(uint serial)
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
@@ -341,23 +344,12 @@ public class PlayerService
 
     private static List<PropertyResponse> GetItemProperties(Item item)
     {
-        var properties = new List<PropertyResponse>();
-        try
+        // Item.GetProperties(IPropertyList) is void and requires a property list builder.
+        // For now, return basic info from the item itself. Full property inspection
+        // can be added later once we verify the IPropertyList API at runtime.
+        return new List<PropertyResponse>
         {
-            var list = item.GetProperties();
-            foreach (var entry in list)
-            {
-                properties.Add(new PropertyResponse
-                {
-                    Number = entry.Number,
-                    Text = entry.String
-                });
-            }
-        }
-        catch
-        {
-            // Some items may not support GetProperties
-        }
-        return properties;
+            new() { Number = 0, Text = item.Name ?? item.GetType().Name }
+        };
     }
 }

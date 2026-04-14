@@ -114,13 +114,14 @@ public static class CommanderApiHost
             });
 
             // Configure CORS
+            var corsOrigins = CommanderApiConfiguration.GetCorsOriginArray();
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    if (CommanderApiConfiguration.CorsOrigins.Length > 0)
+                    if (corsOrigins.Length > 0)
                     {
-                        policy.WithOrigins(CommanderApiConfiguration.CorsOrigins)
+                        policy.WithOrigins(corsOrigins)
                               .AllowAnyHeader()
                               .AllowAnyMethod();
                     }
