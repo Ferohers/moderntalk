@@ -14,13 +14,13 @@
 !Projects/WebPortal/**
 
 # Include custom Server modifications
-!Projects/UOContent/
-!Projects/UOContent/**
+!Projects/Server/
+!Projects/Server/**
 
 # Exclude build artifacts within WebPortal and Server
 Projects/WebPortal/**/bin/
 Projects/WebPortal/**/obj/
 Projects/WebPortal/.DS_Store
-Projects/UOContent/**/bin/
-Projects/UOContent/**/obj/
-Projects/UOContent/.DS_Store
+Projects/Server/**/bin/
+Projects/Server/**/obj/
+Projects/Server/.DS_Store

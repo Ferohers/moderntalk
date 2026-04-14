@@ -23,8 +23,8 @@ RUN git clone --branch ${MODERNUO_BRANCH} ${MODERNUO_REPO} .
 # Copy WebPortal project from build context
 COPY Projects/WebPortal/ Projects/WebPortal/
 
-# Copy custom game logic additions (e.g. HTTP API module)
-COPY Projects/UOContent/ Projects/UOContent/
+# Copy custom Server codebase additions (e.g. HTTP API Module)
+COPY Projects/Server/ Projects/Server/
 
 # --- Patch build configuration to include WebPortal ---
 
