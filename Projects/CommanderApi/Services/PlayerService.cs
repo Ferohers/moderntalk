@@ -59,7 +59,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile == null)
             {
                 return null;
@@ -99,7 +99,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile?.NetState == null)
             {
                 return (false, "Player not found or not online");
@@ -126,7 +126,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile?.NetState == null)
             {
                 return (false, "Player not found or not online");
@@ -163,7 +163,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile == null)
             {
                 return (false, "Player not found");
@@ -188,7 +188,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile == null)
             {
                 return null;
@@ -208,7 +208,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile?.Backpack == null)
             {
                 return null;
@@ -222,7 +222,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile == null)
             {
                 return null;
@@ -261,7 +261,7 @@ public class PlayerService
     {
         return await GameThreadDispatcher.Enqueue(() =>
         {
-            var mobile = World.FindMobile(serial);
+            var mobile = World.FindMobile(new Serial(serial));
             if (mobile == null)
             {
                 return null;
