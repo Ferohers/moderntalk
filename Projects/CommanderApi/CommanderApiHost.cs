@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -61,6 +62,12 @@ public static class CommanderApiHost
             builder.Services.AddSingleton<PlayerService>();
             builder.Services.AddSingleton<AccountService>();
             builder.Services.AddSingleton<AuditLogService>();
+
+            // Register custom route constraint for 'uint' (not built-in to ASP.NET Core)
+            builder.Services.AddRouting(options =>
+            {
+                options.ConstraintMap.Add("uint", typeof(UIntRouteConstraint));
+            });
 
             // Configure JWT authentication
             var key = Encoding.UTF8.GetBytes(CommanderApiConfiguration.JwtSecret);
