@@ -145,8 +145,8 @@ public static class CommanderApiHost
 
             var app = builder.Build();
 
-            // Custom exception handler — catches ALL unhandled exceptions and returns details
-            // (UseDeveloperExceptionPage is a no-op in Production environment)
+            // Global exception handler — catches unhandled exceptions, logs them,
+            // and returns a safe JSON error response (no stack trace leakage)
             app.Use(async (context, next) =>
             {
                 try
@@ -155,14 +155,12 @@ public static class CommanderApiHost
                 }
                 catch (Exception ex)
                 {
+                    logger.Warning("Commander API: Unhandled exception: {Type}: {Message}\n{Stack}",
+                        ex.GetType().Name, ex.Message, ex.StackTrace);
+
                     context.Response.StatusCode = 500;
-                    context.Response.ContentType = "text/plain";
-                    var message = $"EXCEPTION: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}";
-                    if (ex.InnerException != null)
-                    {
-                        message += $"\nINNER: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}\n{ex.InnerException.StackTrace}";
-                    }
-                    await context.Response.WriteAsync(message);
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsJsonAsync(new { error = "An internal server error occurred." });
                 }
             });
 
