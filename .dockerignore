@@ -1,8 +1,9 @@
 # =============================================================================
-# .dockerignore — Minimal build context for standalone WebPortal
+# .dockerignore — Minimal build context for WebPortal + CommanderApi
 #
-# The Dockerfile only needs Projects/WebPortal/ from the build context.
-# Everything else (ModernUO source) is cloned from upstream at build time.
+# The Dockerfile only needs Projects/WebPortal/ and Projects/CommanderApi/
+# from the build context. Everything else (ModernUO source) is cloned from
+# upstream at build time.
 # =============================================================================
 
 # Exclude everything first
@@ -13,7 +14,14 @@
 !Projects/WebPortal/
 !Projects/WebPortal/**
 
-# Exclude build artifacts within WebPortal
+# Include CommanderApi project
+!Projects/CommanderApi/
+!Projects/CommanderApi/**
+
+# Exclude build artifacts within projects
 Projects/WebPortal/**/bin/
 Projects/WebPortal/**/obj/
 Projects/WebPortal/.DS_Store
+Projects/CommanderApi/**/bin/
+Projects/CommanderApi/**/obj/
+Projects/CommanderApi/.DS_Store

@@ -1,13 +1,14 @@
 # =============================================================================
-# ModernUO + WebPortal — Standalone Docker Build
+# ModernUO + WebPortal + CommanderApi — Standalone Docker Build
 #
-# This Dockerfile clones upstream ModernUO, injects the WebPortal project,
-# patches the build configuration, and produces a lean runtime image.
+# This Dockerfile clones upstream ModernUO, injects the WebPortal and
+# CommanderApi projects, patches the build configuration, and produces
+# a lean runtime image.
 #
-# Build context only needs: Projects/WebPortal/
+# Build context needs: Projects/WebPortal/ and Projects/CommanderApi/
 # =============================================================================
 
-# -- Stage 1: Clone upstream ModernUO and inject WebPortal --
+# -- Stage 1: Clone upstream ModernUO and inject projects --
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS source
 
 RUN apt-get update && apt-get install -y --no-install-recommends git \
@@ -23,6 +24,9 @@ RUN git clone --branch ${MODERNUO_BRANCH} ${MODERNUO_REPO} .
 # Copy WebPortal project from build context
 COPY Projects/WebPortal/ Projects/WebPortal/
 
+# Copy CommanderApi project from build context
+COPY Projects/CommanderApi/ Projects/CommanderApi/
+
 # --- Patch build configuration to include WebPortal ---
 
 # 1. Application.csproj: add ASP.NET Core framework reference after </PropertyGroup>
@@ -33,12 +37,16 @@ RUN sed -i '/<\/PropertyGroup>/a\    <ItemGroup>\n        <FrameworkReference In
 RUN sed -i '/<\/ItemGroup>/i\        <ProjectReference Include="..\\WebPortal\\WebPortal.csproj" />' \
     Projects/Application/Application.csproj
 
-# 3. assemblies.json: register WebPortal.dll for runtime assembly loading
-RUN sed -i 's/"UOContent.dll"/"UOContent.dll",\n  "WebPortal.dll"/' \
+# 3. Application.csproj: add CommanderApi project reference before </ItemGroup>
+RUN sed -i '/<\/ItemGroup>/i\        <ProjectReference Include="..\\CommanderApi\\CommanderApi.csproj" />' \
+    Projects/Application/Application.csproj
+
+# 4. assemblies.json: register WebPortal.dll and CommanderApi.dll for runtime assembly loading
+RUN sed -i 's/"UOContent.dll"/"UOContent.dll",\n  "WebPortal.dll",\n  "CommanderApi.dll"/' \
     Distribution/Data/assemblies.json
 
-# 4. ModernUO.slnx: add WebPortal to solution
-RUN sed -i '/UOContent\/UOContent.csproj/a\  <Project Path="Projects/WebPortal/WebPortal.csproj" />' \
+# 5. ModernUO.slnx: add WebPortal and CommanderApi to solution
+RUN sed -i '/UOContent\/UOContent.csproj/a\  <Project Path="Projects/WebPortal/WebPortal.csproj" />\n  <Project Path="Projects/CommanderApi/CommanderApi.csproj" />' \
     ModernUO.slnx
 
 # Verify patches applied correctly
@@ -46,16 +54,22 @@ RUN echo "=== Verifying patches ===" && \
     grep -q "Microsoft.AspNetCore.App" Projects/Application/Application.csproj && \
     echo "  ✓ FrameworkReference added" && \
     grep -q "WebPortal.csproj" Projects/Application/Application.csproj && \
-    echo "  ✓ ProjectReference added" && \
+    echo "  ✓ WebPortal ProjectReference added" && \
+    grep -q "CommanderApi.csproj" Projects/Application/Application.csproj && \
+    echo "  ✓ CommanderApi ProjectReference added" && \
     grep -q "WebPortal.dll" Distribution/Data/assemblies.json && \
-    echo "  ✓ assemblies.json patched" && \
+    echo "  ✓ WebPortal.dll in assemblies.json" && \
+    grep -q "CommanderApi.dll" Distribution/Data/assemblies.json && \
+    echo "  ✓ CommanderApi.dll in assemblies.json" && \
     grep -q "WebPortal.csproj" ModernUO.slnx && \
-    echo "  ✓ ModernUO.slnx patched"
+    echo "  ✓ WebPortal in ModernUO.slnx" && \
+    grep -q "CommanderApi.csproj" ModernUO.slnx && \
+    echo "  ✓ CommanderApi in ModernUO.slnx"
 
 # -- Stage 2: Build --
 FROM source AS build
 
-# Publish the main Application (also builds WebPortal as a dependency)
+# Publish the main Application (also builds WebPortal and CommanderApi as dependencies)
 RUN dotnet publish Projects/Application/Application.csproj \
     -c Release \
     -r linux-x64 \
@@ -67,6 +81,13 @@ RUN dotnet publish Projects/WebPortal/WebPortal.csproj \
     -r linux-x64 \
     --self-contained=false \
     -o /webportal-publish
+
+# Separately publish CommanderApi to collect its DLL and NuGet dependencies
+RUN dotnet publish Projects/CommanderApi/CommanderApi.csproj \
+    -c Release \
+    -r linux-x64 \
+    --self-contained=false \
+    -o /commanderapi-publish
 
 # -- Stage 3: Runtime --
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
@@ -85,15 +106,19 @@ WORKDIR /app
 # Copy the published Distribution folder (ModernUO.dll, Data/, Assemblies/, etc.)
 COPY --from=build /src/Distribution .
 
-# Copy WebPortal assembly to Assemblies folder (ensures it's in the right place)
+# Copy WebPortal assembly to Assemblies folder
 COPY --from=build /webportal-publish/WebPortal.dll ./Assemblies/WebPortal.dll
+
+# Copy CommanderApi assembly to Assemblies folder
+COPY --from=build /commanderapi-publish/CommanderApi.dll ./Assemblies/CommanderApi.dll
 
 # Copy WebPortal frontend files
 COPY --from=build /src/Projects/WebPortal/wwwroot ./wwwroot
 
-# Expose game server and web portal ports
+# Expose game server, web portal, and commander API ports
 EXPOSE 2593
 EXPOSE 8080
+EXPOSE 8090
 
 # ModernUO entry point
 ENTRYPOINT ["dotnet", "ModernUO.dll"]

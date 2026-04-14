@@ -7,8 +7,9 @@
 #   docker compose -f compose2.yml build
 #   docker compose -f compose2.yml up -d
 #
-# The Dockerfile clones upstream ModernUO and injects the WebPortal project.
-# First build takes 5-10 minutes. Subsequent builds are faster (Docker cache).
+# The Dockerfile clones upstream ModernUO and injects the WebPortal and
+# CommanderApi projects. First build takes 5-10 minutes. Subsequent builds
+# are faster (Docker cache).
 # =============================================================================
 
 services:
@@ -20,7 +21,8 @@ services:
     restart: unless-stopped
     ports:
       - "2593:2593"    # Game server (UO client protocol)
-      - "8080:8080"    # Web portal (HTTP)
+      - "8080:8080"    # Web portal (HTTP - player-facing)
+      - "8090:8090"    # Commander API (HTTP - admin-facing)
     volumes:
       - /home/altan/modernuo/gamefiles:/gamefiles
       - ./configuration:/app/Configuration
