@@ -51,8 +51,9 @@ public static class CommanderApiHost
             // Configure Kestrel on the Commander API port (default: 8090)
             builder.WebHost.UseUrls($"http://0.0.0.0:{CommanderApiConfiguration.Port}");
 
-            // Suppress default console logging to avoid cluttering game server output
+            // Add console logger for diagnostics (errors will show in container logs)
             builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
 
             // Register services
             builder.Services.AddSingleton<AdminAuthService>();
@@ -136,6 +137,27 @@ public static class CommanderApiHost
             });
 
             var app = builder.Build();
+
+            // Custom exception handler — catches ALL unhandled exceptions and returns details
+            // (UseDeveloperExceptionPage is a no-op in Production environment)
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    await next(context);
+                }
+                catch (Exception ex)
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "text/plain";
+                    var message = $"EXCEPTION: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}";
+                    if (ex.InnerException != null)
+                    {
+                        message += $"\nINNER: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}\n{ex.InnerException.StackTrace}";
+                    }
+                    await context.Response.WriteAsync(message);
+                }
+            });
 
             // Middleware — order matters
             app.UseMiddleware<AdminRateLimitMiddleware>();
