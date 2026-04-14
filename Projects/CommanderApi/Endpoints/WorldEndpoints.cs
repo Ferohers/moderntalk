@@ -48,7 +48,7 @@ public static class WorldEndpoints
         {
             var item = await GameThreadDispatcher.Enqueue(() =>
             {
-                var target = World.FindItem(new Serial(serial));
+                var target = World.FindItem((Serial)serial);
                 if (target == null)
                 {
                     return null;
