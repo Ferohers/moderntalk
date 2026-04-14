@@ -23,9 +23,6 @@ RUN git clone --branch ${MODERNUO_BRANCH} ${MODERNUO_REPO} .
 # Copy WebPortal project from build context
 COPY Projects/WebPortal/ Projects/WebPortal/
 
-# Copy custom Server codebase additions (e.g. HTTP API Module)
-COPY Projects/Server/ Projects/Server/
-
 # --- Patch build configuration to include WebPortal ---
 
 # 1. Application.csproj: add ASP.NET Core framework reference after </PropertyGroup>
