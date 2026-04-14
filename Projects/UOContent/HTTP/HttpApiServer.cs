@@ -12,7 +12,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Server.Accounting;
 using Server.Commands;
-using Server.Items;
 using Server.Misc;
 using Server.Network;
 
@@ -948,7 +947,7 @@ public static class HttpApiServer
         return parts[3];
     }
     
-    private static List<ItemDto> SerializeContainer(Container container)
+    private static List<ItemDto> SerializeContainer(IContainer container)
     {
         var items = new List<ItemDto>();
         
@@ -964,7 +963,7 @@ public static class HttpApiServer
                 Properties = GetItemProperties(item)
             };
             
-            if (item is Container nestedContainer && nestedContainer.Items.Count > 0)
+            if (item is IContainer nestedContainer && nestedContainer.Items.Count > 0)
             {
                 dto.Children = SerializeContainer(nestedContainer);
             }
