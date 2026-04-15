@@ -13,8 +13,10 @@ public static class AuthEndpoints
         var group = app.MapGroup("/api/admin/auth");
 
         // Login is anonymous — anyone can attempt to log in
-        group.MapPost("/login", async (AdminLoginRequest request, AdminAuthService authService, HttpResponse response) =>
+        group.MapPost("/login", async (AdminLoginRequest request, AdminAuthService authService, AuditLogService auditLog, HttpContext httpContext) =>
         {
+            var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
             if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
                 return Results.BadRequest(new ErrorResponse { Error = "Username and password are required" });
@@ -24,9 +26,11 @@ public static class AuthEndpoints
 
             if (error != null)
             {
+                auditLog.Log(request.Username, "Login", null, $"Remote IP: {remoteIp}", success: false);
                 return Results.BadRequest(new ErrorResponse { Error = error });
             }
 
+            auditLog.Log(request.Username, "Login", null, $"Remote IP: {remoteIp}", success: true);
             return Results.Ok(loginResponse);
         }).AllowAnonymous();
 

@@ -53,8 +53,11 @@ public static class CommanderApiHost
             builder.WebHost.UseUrls($"http://0.0.0.0:{CommanderApiConfiguration.Port}");
 
             // Add console logger for diagnostics (errors will show in container logs)
+            // Suppress noisy ASP.NET Core infrastructure logs (routing, hosting, results)
+            // that fire on every request — only warnings and errors from those are useful.
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
+            builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 
             // Register services
             builder.Services.AddSingleton<AdminAuthService>();

@@ -9,8 +9,9 @@ namespace Server.CommanderApi.Middleware;
 ///     Middleware that selectively logs admin API mutations to the audit log.
 ///     Read-only requests (GET/HEAD/OPTIONS) are never audited — they produce
 ///     no meaningful audit trail and only pollute the log.
-///     Mutation endpoints (POST/PUT/DELETE) log their own descriptive audit
-///     entries explicitly, so the middleware only handles the special login case.
+///     All mutation endpoints (POST/PUT/DELETE) — including login — log their
+///     own descriptive audit entries explicitly in their endpoint handlers,
+///     so no middleware-level logging is needed.
 /// </summary>
 public class AuditLogMiddleware
 {
@@ -42,29 +43,9 @@ public class AuditLogMiddleware
             return;
         }
 
-        // Special case: login endpoint has no authenticated user yet
-        if (path.EndsWith("/auth/login", StringComparison.OrdinalIgnoreCase))
-        {
-            await _next(context);
-
-            // Log successful logins after the fact
-            if (context.Response.StatusCode == 200)
-            {
-                auditLog.Log(
-                    context.Request.Headers.TryGetValue("X-Username", out var username) ? username.ToString() : "unknown",
-                    "Login",
-                    null,
-                    null,
-                    true
-                );
-            }
-
-            return;
-        }
-
-        // All other mutations (POST/PUT/DELETE) are logged explicitly by
-        // their endpoint handlers with descriptive action names and targets.
-        // No middleware-level logging needed.
+        // All mutations (POST/PUT/DELETE) — including login — are logged
+        // explicitly by their endpoint handlers with descriptive action names,
+        // targets, and details. No middleware-level logging needed.
         await _next(context);
     }
 }
