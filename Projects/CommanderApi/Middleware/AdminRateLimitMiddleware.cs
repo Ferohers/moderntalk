@@ -8,12 +8,15 @@ namespace Server.CommanderApi.Middleware;
 /// <summary>
 ///     Simple per-IP rate limiting middleware for the Commander API.
 ///     Limits the number of requests per IP address within a time window.
+///     Periodically evicts stale entries to prevent unbounded memory growth.
 /// </summary>
 public class AdminRateLimitMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ConcurrentDictionary<string, RateLimitEntry> _entries = new();
     private const int MaxRequestsPerMinute = 60;
+    private const int CleanupThreshold = 500; // Evict stale entries when dictionary exceeds this size
+    private static readonly TimeSpan WindowDuration = TimeSpan.FromMinutes(1);
 
     public AdminRateLimitMiddleware(RequestDelegate next)
     {
@@ -40,7 +43,7 @@ public class AdminRateLimitMiddleware
             (_, existing) =>
             {
                 // Reset window if enough time has passed
-                if (DateTime.UtcNow - existing.WindowStart > TimeSpan.FromMinutes(1))
+                if (DateTime.UtcNow - existing.WindowStart > WindowDuration)
                 {
                     return new RateLimitEntry { Count = 1, WindowStart = DateTime.UtcNow };
                 }
@@ -49,6 +52,12 @@ public class AdminRateLimitMiddleware
                 return existing;
             }
         );
+
+        // Evict stale entries when the dictionary grows too large
+        if (_entries.Count > CleanupThreshold)
+        {
+            CleanupStaleEntries();
+        }
 
         if (entry.Count > MaxRequestsPerMinute)
         {
@@ -59,6 +68,19 @@ public class AdminRateLimitMiddleware
         }
 
         await _next(context);
+    }
+
+    private void CleanupStaleEntries()
+    {
+        var cutoff = DateTime.UtcNow - WindowDuration;
+
+        foreach (var kvp in _entries)
+        {
+            if (kvp.Value.WindowStart < cutoff)
+            {
+                _entries.TryRemove(kvp.Key, out _);
+            }
+        }
     }
 
     private class RateLimitEntry

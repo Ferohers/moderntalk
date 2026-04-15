@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Server.CommanderApi.Services;
@@ -8,19 +6,15 @@ using Server.CommanderApi.Services;
 namespace Server.CommanderApi.Middleware;
 
 /// <summary>
-///     Middleware that logs all admin API requests to the audit log.
-///     Captures: actor, HTTP method, path, query string, and response status.
+///     Middleware that selectively logs admin API mutations to the audit log.
+///     Read-only requests (GET/HEAD/OPTIONS) are never audited — they produce
+///     no meaningful audit trail and only pollute the log.
+///     Mutation endpoints (POST/PUT/DELETE) log their own descriptive audit
+///     entries explicitly, so the middleware only handles the special login case.
 /// </summary>
 public class AuditLogMiddleware
 {
     private readonly RequestDelegate _next;
-
-    // Paths that are too noisy to log (e.g., status polling)
-    private static readonly HashSet<string> _skipPaths = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "/api/admin/auth/verify",
-        "/api/admin/server/status"
-    };
 
     public AuditLogMiddleware(RequestDelegate next)
     {
@@ -31,13 +25,6 @@ public class AuditLogMiddleware
     {
         var path = context.Request.Path.Value ?? "";
 
-        // Skip noisy endpoints
-        if (_skipPaths.Contains(path))
-        {
-            await _next(context);
-            return;
-        }
-
         // Only audit /api/admin/ paths
         if (!path.StartsWith("/api/admin/", StringComparison.OrdinalIgnoreCase))
         {
@@ -45,7 +32,17 @@ public class AuditLogMiddleware
             return;
         }
 
-        // Skip login endpoint (no authenticated user yet)
+        // Skip read-only requests — they have no audit value
+        var method = context.Request.Method;
+        if (method.Equals("GET", StringComparison.OrdinalIgnoreCase) ||
+            method.Equals("HEAD", StringComparison.OrdinalIgnoreCase) ||
+            method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+        {
+            await _next(context);
+            return;
+        }
+
+        // Special case: login endpoint has no authenticated user yet
         if (path.EndsWith("/auth/login", StringComparison.OrdinalIgnoreCase))
         {
             await _next(context);
@@ -65,19 +62,9 @@ public class AuditLogMiddleware
             return;
         }
 
-        var actor = context.User.Identity?.Name ?? "unknown";
-        var action = $"{context.Request.Method} {path}";
-
+        // All other mutations (POST/PUT/DELETE) are logged explicitly by
+        // their endpoint handlers with descriptive action names and targets.
+        // No middleware-level logging needed.
         await _next(context);
-
-        var success = context.Response.StatusCode is >= 200 and < 400;
-
-        auditLog.Log(
-            actor,
-            action,
-            path,
-            context.Request.QueryString.Value,
-            success
-        );
     }
 }

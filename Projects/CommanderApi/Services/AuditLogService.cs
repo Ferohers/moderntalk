@@ -2,14 +2,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Server.Logging;
 using Server.CommanderApi.Models;
 
 namespace Server.CommanderApi.Services;
 
 public class AuditLogService
 {
-    private static readonly ILogger logger = LogFactory.GetLogger(typeof(AuditLogService));
     private readonly ConcurrentQueue<AuditLogEntry> _entries = new();
     private const int MaxEntries = 1000;
 
@@ -32,12 +30,6 @@ public class AuditLogService
         {
             _entries.TryDequeue(out _);
         }
-
-        // Also log to the ModernUO logging system
-        logger.Information(
-            "Commander API Audit: {Actor} performed {Action} on {Target} (success: {Success})",
-            actor, action, target ?? "N/A", success
-        );
     }
 
     public List<AuditLogEntryResponse> GetRecentEntries(int count = 100)
