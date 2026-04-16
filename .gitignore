@@ -17,3 +17,11 @@ Thumbs.db
 # Runtime data (mounted as Docker volumes)
 /configuration/
 /shard/
+
+# SSL/TLS certificates (Traefik acme.json)
+acme.json
+
+# Environment variable files
+.env
+.env.*
+!.env.example
