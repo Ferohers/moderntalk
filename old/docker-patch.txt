@@ -1,5 +1,0 @@
-# Copy HTTP API module files
-COPY HttpApiServer.cs Projects/Server/HTTP/HttpApiServer.cs
-COPY JwtHelper.cs Projects/Server/HTTP/JwtHelper.cs
-
-# Add Server project reference for HTTP module (not needed if inline)
